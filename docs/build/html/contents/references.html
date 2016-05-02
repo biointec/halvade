@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Download an prepare the human genome references &mdash; halvade 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="halvade 1.1.0 documentation" href="../index.html" />
+    <link rel="next" title="Uploading the references" href="upload.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="upload.html" title="Uploading the references"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">halvade 1.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="download-an-prepare-the-human-genome-references">
+<h1>Download an prepare the human genome references<a class="headerlink" href="#download-an-prepare-the-human-genome-references" title="Permalink to this headline">¶</a></h1>
+<p>Halvade uses the genome reference fasta file (<code class="docutils literal"><span class="pre">ucsc.hg19.fasta</span></code>) found in the GATK resource bundle to build the index files for both BWA and STAR. The fasta file comes together with an index and a dictionary file. Additionally a full dbsnp file (version 138) is used when recalibrating the basescores for the reads. These files are all found in the GATK resource bundle which is available <a class="reference external" href="ftp://gsapubftp-anonymous&#64;ftp.broadinstitute.org/bundle/2.8/hg19/">here</a>. The ftp site has a limited number of parallel downloads and might not load at these times. Here is how you download the files with in the terminal:</p>
+<div class="highlight-bash"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span>wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/ucsc.hg19.fasta.gz
+wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/ucsc.hg19.fasta.fai.gz
+wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/ucsc.hg19.dict.gz
+wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/dbsnp_138.hg19.vcf.gz
+wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/2.8/hg19/dbsnp_138.hg19.vcf.idx.gz
+</pre></div>
+</td></tr></table></div>
+<p>Next we need to unzip all these files so they can be used in Halvade:</p>
+<div class="highlight-bash"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span>gunzip ucsc.hg19.fasta.gz <span class="o">&amp;&amp;</span> gunzip ucsc.hg19.fasta.fai.gz <span class="o">&amp;&amp;</span> gunzip ucsc.hg19.dict.gz <span class="o">&amp;&amp;</span> <span class="se">\</span>
+gunzip dbsnp_138.hg19.vcf.gz <span class="o">&amp;&amp;</span> gunzip dbsnp_138.hg19.vcf.idx.gz
+</pre></div>
+</td></tr></table></div>
+<div class="section" id="bwa-reference-for-wgs-wes-data">
+<h2>BWA reference for WGS/WES data<a class="headerlink" href="#bwa-reference-for-wgs-wes-data" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="star-reference-for-rna-seq-data">
+<h2>STAR reference for RNA-seq data<a class="headerlink" href="#star-reference-for-rna-seq-data" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Download an prepare the human genome references</a><ul>
+<li><a class="reference internal" href="#bwa-reference-for-wgs-wes-data">BWA reference for WGS/WES data</a></li>
+<li><a class="reference internal" href="#star-reference-for-rna-seq-data">STAR reference for RNA-seq data</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="previous chapter">Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="upload.html"
+                        title="next chapter">Uploading the references</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/contents/references.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="upload.html" title="Uploading the references"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">halvade 1.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Dries Decap.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>
