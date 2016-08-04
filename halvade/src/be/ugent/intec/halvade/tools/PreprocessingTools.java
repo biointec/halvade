@@ -352,6 +352,7 @@ public class PreprocessingTools {
         command.add("INPUT=" + input);
         command.add("OUTPUT=" + output);
         command.add("METRICS_FILE=" + metrics);
+        command.add("VALIDATION_STRINGENCY=LENIENT");
         command.add("ASSUME_SORTED=true");
         if(!keepDups)
             command.add("REMOVE_DUPLICATES=true");

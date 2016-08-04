@@ -90,6 +90,14 @@ public class HalvadeConf {
             return false;
     }
     
+    private static final String keepBamFiles = "keepBamFiles";
+    public static void setKeepBamFiles(Configuration conf, boolean keepBam) {
+        conf.setBoolean(keepBamFiles, keepBam);
+    }
+    public static boolean getKeepBamFiles(Configuration conf) {
+        return conf.getBoolean(keepFiles, false);
+    }
+    
     private static final String useElPrep = "useiprep";
     public static void setUseElPrep(Configuration conf, boolean use) {
         if(use)

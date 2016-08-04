@@ -81,6 +81,7 @@ public class HalvadeOptions {
     public String RGSM = "SAMPLE1";
     public boolean useElPrep = false;
     public boolean keepFiles = false;
+    public boolean keepBamFiles = false;
     public int stand_call_conf = -1;
     public int stand_emit_conf = -1;
     public SAMSequenceDictionary dict;
@@ -156,6 +157,7 @@ public class HalvadeOptions {
             HalvadeConf.setFixQualEnc(hConf, fixQualEnc);
             HalvadeConf.setOutDir(hConf, out);
             HalvadeConf.setKeepFiles(hConf, keepFiles);
+            HalvadeConf.setKeepBamFiles(hConf, keepBamFiles);
             HalvadeConf.setFilterDBSnp(hConf, filterDBSnp);
             HalvadeConf.clearTaskFiles(hConf);
             HalvadeConf.setUseElPrep(hConf, useElPrep);
@@ -496,6 +498,9 @@ public class HalvadeOptions {
         Option optKeep = OptionBuilder.withDescription("Keep intermediate files.")
                 .withLongOpt("keep")
                 .create();
+        Option optKeepBam = OptionBuilder.withDescription("Keep final Bam files.")
+                .withLongOpt("keepbam")
+                .create();
         Option optHap = OptionBuilder.withDescription("Use HaplotypeCaller instead of UnifiedGenotyper for Variant Detection.")
                 .withLongOpt("haplotypecaller")
                 .create("H");
@@ -588,6 +593,7 @@ public class HalvadeOptions {
         options.addOption(optRemDup);
         options.addOption(optstargtf);
         options.addOption(optFixEnc);
+        options.addOption(optKeepBam);
     }
 
     protected boolean parseArguments(String[] args, Configuration halvadeConf) throws ParseException {
@@ -673,6 +679,9 @@ public class HalvadeOptions {
         }
         if (line.hasOption("keep")) {
             keepFiles = true;
+        }
+        if (line.hasOption("keepbam")) {
+            keepBamFiles = true;
         }
         if (line.hasOption("update_rg")) {
             updateRG = true;

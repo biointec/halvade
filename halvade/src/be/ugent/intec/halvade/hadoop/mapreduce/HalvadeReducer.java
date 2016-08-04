@@ -61,6 +61,7 @@ public class HalvadeReducer extends Reducer<ChromosomeRegion, SAMRecordWritable,
     protected boolean keep = false;
     protected boolean inputIsBam = false;
     protected boolean updateRG = false;
+    protected boolean keepBam = false;
     protected SAMReadGroupRecord bamrg;
     protected String outputdir;
     
@@ -133,6 +134,7 @@ public class HalvadeReducer extends Reducer<ChromosomeRegion, SAMRecordWritable,
         super.setup(context);
         keep = HalvadeConf.getKeepFiles(context.getConfiguration());
         inputIsBam = HalvadeConf.inputIsBam(context.getConfiguration());
+        keepBam = HalvadeConf.getKeepBamFiles(context.getConfiguration());
         java = HalvadeConf.getJava(context.getConfiguration());
         // get java extra arguments!
         

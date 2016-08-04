@@ -307,6 +307,16 @@ public abstract class GATKReducer extends HalvadeReducer {
                 HalvadeFileUtils.removeLocalFile(keep, newKnownSites[i], context, HalvadeCounters.FOUT_GATK_TMP);
             }
         }
+        
+        // copy output to keepBam folder in output if required!
+        if (keepBam) {
+            String keepBamOut = outputdir + "keepBam/";
+            HalvadeFileUtils.uploadFileToHDFS(context, 
+                                              FileSystem.get(new URI(outputdir), 
+                                              context.getConfiguration()),
+                                              output, 
+                                              keepBamOut + context.getTaskAttemptID().toString() + ".bam");
+        }
     }
 
     protected void DnaVariantCalling(Context context, String region, GATKTools gatk, String input, String output) throws InterruptedException {
