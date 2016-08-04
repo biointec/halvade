@@ -4,7 +4,7 @@ Troubleshooting
 Find the logs to solve Halvade errors
 -------------------------------------
 
-If Halvade doesn't finish due to an error, the error itself is printed in the output of the Hadoop command. However, more information can be found in the individual task stderr logs of the MapReduce job. The location of these log files is set in the MapReduce settings. If log aggregation is disabled the logs will dissapear after the job is ended, so make sure to enable this in order to look at the task stderr logs. It's highly likely that all reduce tasks give a similar result, so look at the stderr log of any reduce task. 
+If Halvade doesn't finish due to an error, the error itself is printed in the output of the Hadoop command. However, more information can be found in the individual task stderr logs of the MapReduce job. The location of these log files is set in the MapReduce settings. Typically these are stored at `${yarn.log.dir}/userlogs` or if the `YARN_LOG_DIR` environment is set under `$YARN_LOG_DIR/userlogs`. It's highly likely that all reduce tasks give a similar result, so look at the stderr log of any reduce task. 
 This log will show where Halvade is running into problems. If it isn't clear from the log, try to run the last command, with the error, manually. The exact command should be printed in the log as an array of strings, run this command with the shown option.
 
 
