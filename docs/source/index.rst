@@ -22,11 +22,5 @@ Contents:
    contents/samples
    contents/run
    contents/options
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   contents/troubleshooting
 
