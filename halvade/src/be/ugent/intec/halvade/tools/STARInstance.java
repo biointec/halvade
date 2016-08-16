@@ -56,8 +56,8 @@ public class STARInstance extends AlignerInstance {
     private int starType;
     private String stargtf = null;
     
-    private STARInstance(Mapper.Context context, String bin, int starType) throws IOException, URISyntaxException {
-        super(context, bin);
+    private STARInstance(Mapper.Context context, String bin, int starType, int task) throws IOException, URISyntaxException {
+        super(context, bin, task);
         this.starType = starType;
         taskId = context.getTaskAttemptID().toString();
         taskId = taskId.substring(taskId.indexOf("m_"));
@@ -104,10 +104,10 @@ public class STARInstance extends AlignerInstance {
         return outFile;
     }
 
-    public static AlignerInstance getSTARInstance(Mapper.Context context, String bin, int starType) throws URISyntaxException, IOException, InterruptedException {
+    public static AlignerInstance getSTARInstance(Mapper.Context context, String bin, int starType, int task) throws URISyntaxException, IOException, InterruptedException {
         if(instance == null) {
             Logger.DEBUG("STAR instance type: " + starType);
-            instance = new STARInstance(context, bin, starType);
+            instance = new STARInstance(context, bin, starType, task);
             instance.startAligner(context);
         }
         BWAAlnInstance.context = context;

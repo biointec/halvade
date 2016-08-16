@@ -45,7 +45,7 @@ public class Cushaw2Mapper extends HalvadeMapper<ChromosomeRegion, SAMRecordWrit
         super.setup(context);
         try {
             String binDir = checkBinaries(context);
-            instance = Cushaw2Instance.getCushaw2Instance(context, binDir);
+            instance = Cushaw2Instance.getCushaw2Instance(context, binDir, task);
         } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);
             throw new InterruptedException();

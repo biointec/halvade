@@ -117,8 +117,10 @@ public class HalvadeResourceManager {
         if(type != COMBINE)
             conf.set("mapreduce.job.reduce.slowstart.completedmaps", "0.99");
         
-//        conf.set("mapreduce.map.output.compress", "true");
-//        conf.set("mapreduce.map.output.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
+        if(opt.snappy) {
+            conf.set("mapreduce.map.output.compress", "true");
+            conf.set("mapreduce.map.output.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
+        }
         
         HalvadeConf.setMapThreads(conf, opt.mthreads);
         HalvadeConf.setReducerThreads(conf, opt.rthreads);  

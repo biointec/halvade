@@ -48,8 +48,8 @@ public class BWAAlnInstance extends AlignerInstance {
     private String taskId;
     private String alnCustomArgs;
     
-    private BWAAlnInstance(Mapper.Context context, String bin) throws IOException, URISyntaxException {
-        super(context, bin);  
+    private BWAAlnInstance(Mapper.Context context, String bin, int task) throws IOException, URISyntaxException {
+        super(context, bin, task);  
         taskId = context.getTaskAttemptID().toString();
         taskId = taskId.substring(taskId.indexOf("m_"));
         ref = HalvadeFileUtils.downloadBWAIndex(context, taskId);
@@ -215,9 +215,9 @@ public class BWAAlnInstance extends AlignerInstance {
         instance = null;
     }
     
-    static public BWAAlnInstance getBWAInstance(Mapper.Context context, String bin) throws IOException, InterruptedException, URISyntaxException {
+    static public BWAAlnInstance getBWAInstance(Mapper.Context context, String bin, int task) throws IOException, InterruptedException, URISyntaxException {
         if(instance == null) {
-            instance = new BWAAlnInstance(context, bin);
+            instance = new BWAAlnInstance(context, bin, task);
             instance.startAligner(context);
         }
         BWAAlnInstance.context = context;

@@ -22,8 +22,8 @@ public class DummyAlignerInstance extends AlignerInstance {
     private static DummyAlignerInstance instance;
     private String taskId;
     
-    private DummyAlignerInstance(Mapper.Context context, String bin) throws IOException, URISyntaxException {
-        super(context, bin);  
+    private DummyAlignerInstance(Mapper.Context context, String bin, int task) throws IOException, URISyntaxException {
+        super(context, bin, task);  
         taskId = context.getTaskAttemptID().toString();
         taskId = taskId.substring(taskId.indexOf("m_"));
 //        ref = HalvadeFileUtils.downloadBWAIndex(context, taskId);
@@ -47,9 +47,9 @@ public class DummyAlignerInstance extends AlignerInstance {
     public void closeAligner() throws InterruptedException {
     }
     
-    static public DummyAlignerInstance getDummyInstance(Mapper.Context context, String bin) throws IOException, InterruptedException, URISyntaxException {
+    static public DummyAlignerInstance getDummyInstance(Mapper.Context context, String bin, int task) throws IOException, InterruptedException, URISyntaxException {
         if(instance == null) {
-            instance = new DummyAlignerInstance(context, bin);
+            instance = new DummyAlignerInstance(context, bin, task);
             instance.startAligner(context);
         }
         BWAAlnInstance.context = context;

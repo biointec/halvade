@@ -43,7 +43,7 @@ public class BWAMemMapper extends HalvadeMapper<ChromosomeRegion, SAMRecordWrita
         super.setup(context);
         try {
             String binDir = checkBinaries(context); 
-            instance = BWAMemInstance.getBWAInstance(context, binDir);
+            instance = BWAMemInstance.getBWAInstance(context, binDir, task);
         } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);
             throw new InterruptedException();

@@ -25,6 +25,7 @@ public class AlignedBamMapper extends Mapper<LongWritable,SAMRecordWritable,
         ChromosomeRegion, SAMRecordWritable> {
     protected AlignerInstance instance;
     boolean isPaired = true;
+    protected int task;
     
     @Override
     protected void map(LongWritable key, SAMRecordWritable value, Context context) throws IOException, InterruptedException {
@@ -44,9 +45,11 @@ public class AlignedBamMapper extends Mapper<LongWritable,SAMRecordWritable,
         isPaired = HalvadeConf.getIsPaired(context.getConfiguration());
         try {
             String taskId = context.getTaskAttemptID().toString();
-            Logger.DEBUG("taskId = " + taskId);
+            task = Integer.parseInt(taskId.split("_")[4]);
+            Logger.DEBUG("taskId = " + taskId );
+            Logger.DEBUG("task = " + task);
             HalvadeConf.addTaskRunning(context.getConfiguration(), taskId);
-            instance = DummyAlignerInstance.getDummyInstance(context, null);
+            instance = DummyAlignerInstance.getDummyInstance(context, null, task);
         } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);
             throw new InterruptedException();

@@ -46,8 +46,8 @@ public class Cushaw2Instance extends AlignerInstance {
     private String taskId;
     private String cushaw2CustomArgs;
     
-    private Cushaw2Instance(Mapper.Context context, String bin) throws IOException, URISyntaxException {
-        super(context, bin);  
+    private Cushaw2Instance(Mapper.Context context, String bin, int task) throws IOException, URISyntaxException {
+        super(context, bin, task);  
         taskId = context.getTaskAttemptID().toString();
         taskId = taskId.substring(taskId.indexOf("m_"));
         ref = HalvadeFileUtils.downloadCushaw2Index(context, taskId);
@@ -145,9 +145,9 @@ public class Cushaw2Instance extends AlignerInstance {
         instance = null;
     }
     
-    static public Cushaw2Instance getCushaw2Instance(Mapper.Context context, String bin) throws IOException, InterruptedException, URISyntaxException {
+    static public Cushaw2Instance getCushaw2Instance(Mapper.Context context, String bin, int task) throws IOException, InterruptedException, URISyntaxException {
         if(instance == null) {
-            instance = new Cushaw2Instance(context, bin);
+            instance = new Cushaw2Instance(context, bin, task);
             instance.startAligner(context);
         }
         Cushaw2Instance.context = context;

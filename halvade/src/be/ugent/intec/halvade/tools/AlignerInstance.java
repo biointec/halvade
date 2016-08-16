@@ -64,11 +64,11 @@ public abstract class AlignerInstance {
     protected boolean mergeBam;
     
     
-    protected AlignerInstance(Mapper.Context context, String bin) throws IOException, URISyntaxException {
+    protected AlignerInstance(Mapper.Context context, String bin, int task) throws IOException, URISyntaxException {
         AlignerInstance.context = context;
         header = null;
         containers = HalvadeConf.getMapContainerCount(context.getConfiguration());
-        tasksLeft = HalvadeConf.getMapTasksLeft(context.getConfiguration());
+        tasksLeft = HalvadeConf.getMapTasksLeft(task, context.getConfiguration());
         redistribute = HalvadeConf.getRedistribute(context.getConfiguration());
         mergeBam = HalvadeConf.getMergeBam(context.getConfiguration());
         writableRecord = new SAMRecordWritable();

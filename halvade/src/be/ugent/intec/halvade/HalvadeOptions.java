@@ -88,7 +88,8 @@ public class HalvadeOptions {
     public String chr = null;
     public int reducerContainersPerNode = -1;
     public int mapContainersPerNode = -1;
-    public boolean justAlign = false;;
+    public boolean justAlign = false;
+    ;
     public boolean mergeBam = false;
     public String bedFile = null;
     public String filterBed = null;
@@ -109,13 +110,14 @@ public class HalvadeOptions {
     public boolean smtEnabled = false;
     public boolean reorderRegions = false;
     public boolean updateRG = false;
+    public boolean snappy = false;
     public int overrideMapMem = -1;
     public int overrideRedMem = -1;
     public boolean countOnly = false;
     public boolean keepDups = true;
     public boolean fixQualEnc = false;
     public String stargtf = null;
-    
+
     protected DecimalFormat onedec;
     protected static final double REDUCE_TASKS_FACTOR = 1.68 * 15;
     protected static final double DEFAULT_COVERAGE = 50;
@@ -147,10 +149,10 @@ public class HalvadeOptions {
             HalvadeConf.setKnownSitesOnHDFS(hConf, hdfsSites);
             HalvadeConf.setIsPaired(hConf, paired);
             HalvadeConf.setIsRNA(hConf, rnaPipeline);
-            if (bedFile != null) {            
+            if (bedFile != null) {
                 HalvadeConf.setBed(hConf, bedFile);
             }
-            if (filterBed != null) {            
+            if (filterBed != null) {
                 HalvadeConf.setFilterBed(hConf, filterBed);
             }
             HalvadeConf.setInputIsBam(hConf, useBamInput);
@@ -171,7 +173,7 @@ public class HalvadeOptions {
             if (STARGenome != null) {
                 HalvadeConf.setStarDirPass2HDFS(hConf, out);
             }
-            if (stargtf != null) { 
+            if (stargtf != null) {
                 HalvadeConf.setStarGtf(hConf, stargtf);
             }
 
@@ -192,7 +194,6 @@ public class HalvadeOptions {
                 HalvadeConf.setSEC(hConf, stand_emit_conf);
             }
 
-
         } catch (ParseException e) {
             Logger.DEBUG(e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
@@ -203,8 +204,8 @@ public class HalvadeOptions {
         }
         return 0;
     }
-    
-    protected void splitChromosomes(Configuration hConf, int nReduces) throws URISyntaxException, IOException {        
+
+    protected void splitChromosomes(Configuration hConf, int nReduces) throws URISyntaxException, IOException {
         parseDictFile(hConf);
 //        double inputSize = getInputSize(in, hConf);
 //        if (coverage == -1.0) {
@@ -213,25 +214,29 @@ public class HalvadeOptions {
 //        Logger.DEBUG("Estimated coverage: " + roundOneDecimal(coverage));
         // set a minimum first where the real amount is based on
 //            reduces = (int) (coverage * REDUCE_TASKS_FACTOR);
-        if(nReduces == 0 )
-            reduces = (int) (1.75*nodes*reducerContainersPerNode);
-        else
+        if (nReduces == 0) {
+            reduces = (int) (1.845 * nodes * reducerContainersPerNode);
+        } else {
             reduces = nReduces;
-        if(reduces < 26) reduces = 26; // set a minimum of 26 reduces so at least all big chromosomes have one reduce task.
+        }
+        if (reduces < 26) {
+            reduces = 26; // set a minimum of 26 reduces so at least all big chromosomes have one reduce task.
+        }
         int tmpReduces = reduces + 1;
         Logger.DEBUG("requested # reducers: " + reduces);
         double factor = 0.95;
         int factoredReduces = reduces;
         ChromosomeSplitter splitter = null;
-        while(tmpReduces > reduces) {
-            if(bedFile != null)
+        while (tmpReduces > reduces) {
+            if (bedFile != null) {
                 splitter = new ChromosomeSplitter(dict, bedFile, factoredReduces);
-            else if (readCountsPerRegionFile != null)
+            } else if (readCountsPerRegionFile != null) {
                 splitter = new ChromosomeSplitter(dict, readCountsPerRegionFile, factoredReduces, reorderRegions);
-            else
+            } else {
                 splitter = new ChromosomeSplitter(dict, factoredReduces);
+            }
             tmpReduces = splitter.getRegionCount();
-            factoredReduces = (int)(factoredReduces * factor);
+            factoredReduces = (int) (factoredReduces * factor);
         }
 
         String bedRegions = out + "HalvadeRegions.bed";
@@ -261,7 +266,6 @@ public class HalvadeOptions {
         }
         return (size / (1024 * 1024 * 1024));
     }
-
 
     protected void parseDictFile(Configuration conf) {
         be.ugent.intec.halvade.utils.Logger.DEBUG("parsing dictionary " + ref + DICT_SUFFIX);
@@ -350,12 +354,12 @@ public class HalvadeOptions {
                 .hasArg()
                 .withDescription("Overrides the maximum map container memory [in GB].")
                 .withLongOpt("mapmem")
-                .create( );
+                .create();
         Option optRmem = OptionBuilder.withArgName("gb")
                 .hasArg()
                 .withDescription("Overrides the maximum reduce container memory [in GB].")
                 .withLongOpt("redmem")
-                .create( );
+                .create();
         Option optSites = OptionBuilder.withArgName("snpDBa,snpDBb")
                 .hasArg()
                 .isRequired(true)
@@ -385,7 +389,7 @@ public class HalvadeOptions {
                 .hasArg()
                 .withDescription("sets the RGID for the read-group.")
                 .withLongOpt("id")
-                .create( );
+                .create();
         Option optLB = OptionBuilder.withArgName("RGLB")
                 .hasArg()
                 .withDescription("sets the RGLB for the read-group.")
@@ -492,6 +496,9 @@ public class HalvadeOptions {
         Option optJustAlign = OptionBuilder.withDescription("Only align the reads.")
                 .withLongOpt("justalign")
                 .create("A");
+        Option optSnappy = OptionBuilder.withDescription("Enable snappy compression for Map output.")
+                .withLongOpt("snappy")
+                .create();
         Option optSmt = OptionBuilder.withDescription("Enable simultaneous multithreading.")
                 .withLongOpt("smt")
                 .create();
@@ -578,7 +585,7 @@ public class HalvadeOptions {
         options.addOption(optReportAll);
         options.addOption(optSmt);
         options.addOption(optRna);
-//        options.addOption(optReadsPerRegion);
+        options.addOption(optReadsPerRegion);
         options.addOption(optStarGenome);
         options.addOption(optBamIn);
         options.addOption(optCustomArgs);
@@ -587,13 +594,14 @@ public class HalvadeOptions {
         options.addOption(optMmem);
         options.addOption(optMergeBam);
         options.addOption(optVerbose);
-//        options.addOption(optReorderRegions);
+        options.addOption(optReorderRegions);
         options.addOption(optupdateRG);
         options.addOption(optCount);
         options.addOption(optRemDup);
         options.addOption(optstargtf);
         options.addOption(optFixEnc);
         options.addOption(optKeepBam);
+        options.addOption(optSnappy);
     }
 
     protected boolean parseArguments(String[] args, Configuration halvadeConf) throws ParseException {
@@ -603,7 +611,9 @@ public class HalvadeOptions {
 
         in = line.getOptionValue("I");
         out = line.getOptionValue("O");
-        if(!out.endsWith("/")) out += "/";
+        if (!out.endsWith("/")) {
+            out += "/";
+        }
         ref = line.getOptionValue("R");
         sites = line.getOptionValue("D");
         halvadeBinaries = line.getOptionValue("B");
@@ -611,11 +621,15 @@ public class HalvadeOptions {
         if (line.hasOption("bam")) {
             useBamInput = true;
         }
+        if (line.hasOption("snappy")) {
+            snappy = true;
+        }
         if (line.hasOption("rna")) {
             rnaPipeline = true;
-            if (line.hasOption("star"))
+            if (line.hasOption("star")) {
                 STARGenome = line.getOptionValue("star");
-            if(!useBamInput && STARGenome == null) {
+            }
+            if (!useBamInput && STARGenome == null) {
                 throw new ParseException("the '-rna' option requires --star pointing to the location of the STAR reference directory if alignment with STAR aligner is required (fastq).");
             }
         }
@@ -628,7 +642,9 @@ public class HalvadeOptions {
         }
         if (line.hasOption("refdir")) {
             localRefDir = line.getOptionValue("refdir");
-            if(!localRefDir.endsWith("/")) localRefDir += "/";
+            if (!localRefDir.endsWith("/")) {
+                localRefDir += "/";
+            }
         }
         if (line.hasOption("nodes")) {
             nodes = Integer.parseInt(line.getOptionValue("nodes"));
@@ -639,7 +655,7 @@ public class HalvadeOptions {
         if (line.hasOption("smt")) {
             smtEnabled = true;
         }
-        if(line.hasOption("remove_dups")) {
+        if (line.hasOption("remove_dups")) {
             keepDups = false;
         }
         if (line.hasOption("mem")) {
@@ -698,8 +714,9 @@ public class HalvadeOptions {
         }
         if (line.hasOption("aln")) {
             aln = Integer.parseInt(line.getOptionValue("aln"));
-            if(aln < 0 || aln > 3)
+            if (aln < 0 || aln > 3) {
                 aln = 0; // default value
+            }
         }
         if (line.hasOption("J")) {
             java = line.getOptionValue("J");

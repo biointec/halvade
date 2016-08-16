@@ -63,7 +63,7 @@ public class StarAlignPassXMapper  extends HalvadeMapper<GenomeSJ, Text> {
         try {
             String binDir = checkBinaries(context);
             runPass2 = HalvadeConf.getIsPass2(context.getConfiguration());
-            instance = STARInstance.getSTARInstance(context, binDir, runPass2 ? STARInstance.PASS2 : STARInstance.PASS1);  
+            instance = STARInstance.getSTARInstance(context, binDir, runPass2 ? STARInstance.PASS2 : STARInstance.PASS1, task);  
             loadReference(context);
          } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);

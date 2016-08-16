@@ -25,6 +25,7 @@ public class HalvadeMapper<T1, T2> extends Mapper<LongWritable, Text, T1, T2> {
     protected int count, readcount;
     protected AlignerInstance instance;
     protected boolean allTasksHaveStarted;
+    protected int task;
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
@@ -34,7 +35,7 @@ public class HalvadeMapper<T1, T2> extends Mapper<LongWritable, Text, T1, T2> {
             Logger.DEBUG("starting cleanup: closing aligner");
             instance.closeAligner();
             Logger.DEBUG("finished cleanup");
-            allTasksHaveStarted = HalvadeConf.allTasksCompleted(context.getConfiguration());
+            allTasksHaveStarted = HalvadeConf.allTasksCompleted(task, context.getConfiguration());
         } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);
         }
@@ -58,7 +59,9 @@ public class HalvadeMapper<T1, T2> extends Mapper<LongWritable, Text, T1, T2> {
             readcount = 0;
             // add a file to distributed cache representing this task
             String taskId = context.getTaskAttemptID().toString();
-            Logger.DEBUG("taskId = " + taskId);
+            task = Integer.parseInt(taskId.split("_")[4]);
+            Logger.DEBUG("taskId = " + taskId );
+            Logger.DEBUG("task = " + task);
             HalvadeConf.addTaskRunning(context.getConfiguration(), taskId);
         } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);

@@ -46,8 +46,8 @@ public class Bowtie2Instance extends AlignerInstance {
     private String taskId;
     private String bowtie2CustomArgs;
     
-    private Bowtie2Instance(Mapper.Context context, String bin) throws IOException, URISyntaxException {
-        super(context, bin);  
+    private Bowtie2Instance(Mapper.Context context, String bin, int task) throws IOException, URISyntaxException {
+        super(context, bin, task);  
         taskId = context.getTaskAttemptID().toString();
         taskId = taskId.substring(taskId.indexOf("m_"));
         ref = HalvadeFileUtils.downloadBowtie2Index(context, taskId);
@@ -144,9 +144,9 @@ public class Bowtie2Instance extends AlignerInstance {
         instance = null;
     }
     
-    static public Bowtie2Instance getBowtie2Instance(Mapper.Context context, String bin) throws IOException, InterruptedException, URISyntaxException {
+    static public Bowtie2Instance getBowtie2Instance(Mapper.Context context, String bin, int task) throws IOException, InterruptedException, URISyntaxException {
         if(instance == null) {
-            instance = new Bowtie2Instance(context, bin);
+            instance = new Bowtie2Instance(context, bin, task);
             instance.startAligner(context);
         }
         Bowtie2Instance.context = context;

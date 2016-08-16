@@ -45,7 +45,7 @@ public class Bowtie2Mapper extends HalvadeMapper<ChromosomeRegion, SAMRecordWrit
         super.setup(context);
         try {
             String binDir = checkBinaries(context);
-            instance = Bowtie2Instance.getBowtie2Instance(context, binDir);
+            instance = Bowtie2Instance.getBowtie2Instance(context, binDir, task);
         } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);
             throw new InterruptedException();

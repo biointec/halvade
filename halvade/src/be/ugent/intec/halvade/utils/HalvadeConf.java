@@ -269,10 +269,11 @@ public class HalvadeConf {
     }
     
     public static boolean addTaskRunning(Configuration conf, String val) throws IOException, URISyntaxException {
-        val = val.substring(0, val.lastIndexOf("_")); // rewrite file if second attempt
-        String filepath = conf.get(outdir) + tasksDone + val;
-        FileSystem fs = FileSystem.get(new URI(filepath), conf);
-        return fs.createNewFile(new Path(filepath));
+//        val = val.substring(0, val.lastIndexOf("_")); // rewrite file if second attempt
+//        String filepath = conf.get(outdir) + tasksDone + val;
+//        FileSystem fs = FileSystem.get(new URI(filepath), conf);
+//        return fs.createNewFile(new Path(filepath));
+        return true;
     }
     
     private static final String totalContainers = "containers";
@@ -282,33 +283,33 @@ public class HalvadeConf {
     public static int getMapContainerCount(Configuration conf) {
         return conf.getInt(totalContainers, 1);
     }
-    public static int getMapTasksLeft(Configuration conf) throws IOException, URISyntaxException {
-        int containers = conf.getInt(totalContainers, 1);        
-        int tasks = 0;
-        String filedir = conf.get(outdir) + tasksDone;
-        FileSystem fs = FileSystem.get(new URI(filedir), conf);
-        FileStatus[] files = fs.listStatus(new Path(filedir));
-        for(FileStatus file : files) {
-            if (!file.isDirectory()) {
-                tasks++;
-            }
-        }
-        Logger.DEBUG("containers left: " + (Integer.parseInt(conf.get("mapred.map.tasks")) - tasks));
-        return Integer.parseInt(conf.get("mapred.map.tasks")) - tasks;        
+    public static int getMapTasksLeft(int task, Configuration conf) throws IOException, URISyntaxException {
+//        int tasks = 0;
+//        String filedir = conf.get(outdir) + tasksDone;
+//        FileSystem fs = FileSystem.get(new URI(filedir), conf);
+//        FileStatus[] files = fs.listStatus(new Path(filedir));
+//        for(FileStatus file : files) {
+//            if (!file.isDirectory()) {
+//                tasks++;
+//            }
+//        }
+        int totaltasks = Integer.parseInt(conf.get("mapred.map.tasks"));
+        Logger.DEBUG("containers left: " + (totaltasks - task));
+        return totaltasks - task;        
     }
     
-    public static boolean allTasksCompleted(Configuration conf) throws IOException, URISyntaxException {
-        int tasks = 0;
-        String filedir = conf.get(outdir) + tasksDone;
-        FileSystem fs = FileSystem.get(new URI(filedir), conf);
-        FileStatus[] files = fs.listStatus(new Path(filedir));
-        for(FileStatus file : files) {
-            if (!file.isDirectory()) {
-                tasks++;
-            }
-        }
-        Logger.DEBUG("tasks started: " + tasks);
-        return tasks >= Integer.parseInt(conf.get("mapred.map.tasks"));        
+    public static boolean allTasksCompleted(int task, Configuration conf) throws IOException, URISyntaxException {
+//        int tasks = 0;
+//        String filedir = conf.get(outdir) + tasksDone;
+//        FileSystem fs = FileSystem.get(new URI(filedir), conf);
+//        FileStatus[] files = fs.listStatus(new Path(filedir));
+//        for(FileStatus file : files) {
+//            if (!file.isDirectory()) {
+//                tasks++;
+//            }
+//        }
+        Logger.DEBUG("tasks started: " + task);
+        return task == Integer.parseInt(conf.get("mapred.map.tasks"));        
     }
     
     private static final String refOnHDFSName = "hdfsref";

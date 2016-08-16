@@ -38,8 +38,8 @@ public class BWAMemInstance extends AlignerInstance {
      * 
      * This BWA instance runs BWA from stdin (custom provided BWA is needed)
      */
-    private BWAMemInstance(Context context, String bin) throws IOException, URISyntaxException {
-        super(context, bin);
+    private BWAMemInstance(Context context, String bin, int task) throws IOException, URISyntaxException {
+        super(context, bin, task);
         String taskid = context.getTaskAttemptID().toString();
         taskid = taskid.substring(taskid.indexOf("m_"));
         ref = HalvadeFileUtils.downloadBWAIndex(context, taskid);
@@ -94,9 +94,9 @@ public class BWAMemInstance extends AlignerInstance {
         instance = null;
     }
         
-    static public BWAMemInstance getBWAInstance(Mapper.Context context, String bin) throws IOException, InterruptedException, URISyntaxException {
+    static public BWAMemInstance getBWAInstance(Mapper.Context context, String bin, int task) throws IOException, InterruptedException, URISyntaxException {
         if(instance == null) {
-            instance = new BWAMemInstance(context, bin);
+            instance = new BWAMemInstance(context, bin, task);
             instance.startAligner(context);
         }
         BWAMemInstance.context = context;
