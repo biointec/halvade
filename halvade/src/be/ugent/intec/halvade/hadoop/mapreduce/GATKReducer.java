@@ -351,11 +351,14 @@ public abstract class GATKReducer extends HalvadeReducer {
         HalvadeFileUtils.removeLocalFile(keep, input.replaceAll(".bam", ".bai"));
     }
 
-    protected void splitNTrim(Context context, String region, GATKTools gatk, String input, String output) throws InterruptedException {
+    protected void splitNTrim(Context context, String region, GATKTools gatk, String input, String output, boolean resetScore) throws InterruptedException {
         Logger.DEBUG("run SplitNCigarReads");
         context.setStatus("run SplitNCigarReads");
         context.getCounter(HalvadeCounters.TOOLS_GATK).increment(1);
-        gatk.runSplitNCigarReads(input, output, ref, region, newMaxQualScore);
+        if(resetScore)
+            gatk.runSplitNCigarReads(input, output, ref, region, newMaxQualScore);
+        else
+            gatk.runSplitNCigarReads(input, output, ref, region);
 
         HalvadeFileUtils.removeLocalFile(keep, input, context, HalvadeCounters.FOUT_GATK_TMP);
         HalvadeFileUtils.removeLocalFile(keep, input.replaceAll(".bam", ".bai"));

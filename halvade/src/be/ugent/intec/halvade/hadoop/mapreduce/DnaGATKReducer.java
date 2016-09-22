@@ -34,6 +34,7 @@ public class DnaGATKReducer extends GATKReducer {
         String tmpFile2 = tmpFileBase + "-3.bam";
         String snps = tmpFileBase + ".vcf";    
         boolean useElPrep = HalvadeConf.getUseElPrep(context.getConfiguration());
+        boolean splitNtrim = HalvadeConf.getSplitNTrim(context.getConfiguration());
         ChromosomeRange r = new ChromosomeRange();
         SAMRecordIterator SAMit = new SAMRecordIterator(values.iterator(), header, r, fixQualEnc);
         
@@ -52,7 +53,14 @@ public class DnaGATKReducer extends GATKReducer {
         region = makeRegionFile(context, r, tools, region);
         if(region == null) return;
         
-        indelRealignment(context, region, gatk, preprocess, tmpFile1);        
+        // do splitntrim if option
+        if(splitNtrim) {
+            String tmpFile0 = tmpFileBase + "-1.bam";
+            splitNTrim(context, region, gatk, preprocess, tmpFile0, false);
+            indelRealignment(context, region, gatk, tmpFile0, tmpFile1);  
+        } else {
+            indelRealignment(context, region, gatk, preprocess, tmpFile1);  
+        }      
         baseQualityScoreRecalibration(context, region, r, tools, gatk, tmpFile1, tmpFile2);        
         DnaVariantCalling(context, region, gatk, tmpFile2, snps);
         variantFiles.add(snps);

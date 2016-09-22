@@ -82,6 +82,7 @@ public class HalvadeOptions {
     public boolean useElPrep = false;
     public boolean keepFiles = false;
     public boolean keepBamFiles = false;
+    public boolean splitntrim = false;
     public int stand_call_conf = -1;
     public int stand_emit_conf = -1;
     public SAMSequenceDictionary dict;
@@ -167,6 +168,7 @@ public class HalvadeOptions {
             HalvadeConf.setUseUnifiedGenotyper(hConf, useGenotyper);
             HalvadeConf.setMergeBam(hConf, mergeBam);
             HalvadeConf.setKeepDups(hConf, keepDups);
+            HalvadeConf.setSplitNTrim(hConf, splitntrim);
             HalvadeConf.setRedistribute(hConf, redistribute);
             HalvadeConf.setReadGroup(hConf, "ID:" + RGID + " LB:" + RGLB + " PL:" + RGPL + " PU:" + RGPU + " SM:" + RGSM);
             HalvadeConf.setkeepChrSplitPairs(hConf, keepChrSplitPairs);
@@ -526,6 +528,9 @@ public class HalvadeOptions {
         Option optBamIn = OptionBuilder.withDescription("Uses aligned bam as input files instead of unaligned fastq files.")
                 .withLongOpt("bam")
                 .create();
+        Option optSplitNTrim = OptionBuilder.withDescription("Adds a step splitNTrim before the other GATK steps in the DNA-seq pipeline.")
+                .withLongOpt("splitntrim")
+                .create();
         Option optRedis = OptionBuilder.withDescription("This will enable Halvade to redistribute resources when possible when not all containers are used.")
                 .withLongOpt("redistribute")
                 .create();
@@ -602,6 +607,7 @@ public class HalvadeOptions {
         options.addOption(optFixEnc);
         options.addOption(optKeepBam);
         options.addOption(optSnappy);
+        options.addOption(optSplitNTrim);
     }
 
     protected boolean parseArguments(String[] args, Configuration halvadeConf) throws ParseException {
@@ -671,6 +677,9 @@ public class HalvadeOptions {
         if (line.hasOption("rpn")) {
             setReduceContainers = false;
             reducerContainersPerNode = Integer.parseInt(line.getOptionValue("rpn"));
+        }
+        if(line.hasOption("splitntrim")) {
+            splitntrim = true;
         }
         if (line.hasOption("mapmem")) {
             overrideMapMem = (int) (Double.parseDouble(line.getOptionValue("mapmem")) * 1024);

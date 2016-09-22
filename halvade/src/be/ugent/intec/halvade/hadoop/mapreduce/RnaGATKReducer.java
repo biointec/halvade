@@ -50,7 +50,7 @@ public class RnaGATKReducer extends GATKReducer {
         region = makeRegionFile(context, r, tools, region);
         if(region == null) return;
         
-        splitNTrim(context, region, gatk, preprocess, tmpFile1);
+        splitNTrim(context, region, gatk, preprocess, tmpFile1, true);
         indelRealignment(context, region, gatk, tmpFile1, tmpFile2);        
         baseQualityScoreRecalibration(context, region, r, tools, gatk, tmpFile2, tmpFile3);        
         RnaVariantCalling(context, region, gatk, tmpFile3, snps);

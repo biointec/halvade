@@ -607,5 +607,14 @@ public class HalvadeConf {
         return conf.getBoolean(fixQualEnc, false);
     }
 
+    private static final String splitntrim = "SplitNTrim";
+    public static void setSplitNTrim(Configuration conf, boolean val) {
+        conf.setBoolean(splitntrim, val);
+    }
+    
+    public static boolean getSplitNTrim(Configuration conf) {
+        return conf.getBoolean(splitntrim, false);
+    }
+
 
 }

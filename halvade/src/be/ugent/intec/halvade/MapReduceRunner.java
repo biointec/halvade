@@ -298,15 +298,15 @@ public class MapReduceRunner extends Configured implements Tool  {
     protected void addInputFiles(String input, Configuration conf, Job job) throws URISyntaxException, IOException {
         FileSystem fs = FileSystem.get(new URI(input), conf);
         Logger.DEBUG("adding input files from " + input);
-        if (fs.getFileStatus(new Path(input)).isDirectory()) {
-            // add every file in directory
-            FileStatus[] files = fs.listStatus(new Path(input));
-            for(FileStatus file : files) {
-                if (!file.isDirectory()) {
-                    FileInputFormat.addInputPath(job, file.getPath());
-                }
-            }
-        } else
+//        if (fs.getFileStatus(new Path(input)).isDirectory()) {
+//             //add every file in directory
+//            FileStatus[] files = fs.listStatus(new Path(input));
+//            for(FileStatus file : files) {
+//                if (!file.isDirectory()) {
+//                    FileInputFormat.addInputPath(job, file.getPath());
+//                }
+//            }
+//        } else
             FileInputFormat.addInputPath(job, new Path(input));
     }
     

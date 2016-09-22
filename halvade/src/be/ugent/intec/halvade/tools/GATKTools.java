@@ -198,6 +198,35 @@ public class GATKTools {
             context.getCounter(HalvadeCounters.TIME_GATK_INDEL_REALN).increment(estimatedTime);   
         
     }
+        public void runSplitNCigarReads(String input, String output, String ref, String region) throws InterruptedException {
+        /**
+         * example: 
+         * java -Xmx4g -jar GenomeAnalysisTK.jar 
+         * -T SplitNCigarReads 
+         * -R ref.fasta 
+         * -I dedupped.bam 
+         * -o split.bam 
+         * -rf ReassignOneMappingQuality 
+         * -RMQF 255 
+         * -RMQT 60 
+         * -U ALLOW_N_CIGAR_READS  
+         * 
+         */
+        String[] command = {
+            mem, "-jar", gatk,
+            "-T", "SplitNCigarReads",
+            "-R", ref,
+            "-I", input,
+            "-o", output,
+            "-U", "ALLOW_N_CIGAR_READS",
+            "-fixNDN",
+            "-L", region};
+        String customArgs = HalvadeConf.getCustomArgs(context.getConfiguration(), "gatk", "splitncigarreads");
+        long estimatedTime = runProcessAndWait("GATK SplitNCigarReads", AddCustomArguments(command, customArgs));   
+        if(context != null)
+            context.getCounter(HalvadeCounters.TIME_GATK_INDEL_REALN).increment(estimatedTime);   
+        
+    }
     
     public void runVariantFiltration(String input, String output, String ref, String region, int window, int cluster, double minFS, double maxQD) throws InterruptedException {
         /**
