@@ -56,7 +56,7 @@ public class HalvadeMapper<T1, T2> extends Mapper<LongWritable, Text, T1, T2> {
         super.setup(context);
         try {
             count = 0;
-            readcount = 0;
+            readcount = -1; // will be 0 at first read  -> means read 1
             // add a file to distributed cache representing this task
             String taskId = context.getTaskAttemptID().toString();
             task = Integer.parseInt(taskId.split("_")[4]);

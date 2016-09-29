@@ -18,11 +18,14 @@
 package be.ugent.intec.halvade.uploader;
 
 import be.ugent.intec.halvade.uploader.input.FileReaderFactory;
+import be.ugent.intec.halvade.uploader.mapreduce.BamIdGroupingComparator;
+import be.ugent.intec.halvade.uploader.mapreduce.BamIdPartitioner;
+import be.ugent.intec.halvade.uploader.mapreduce.BamIdSortComparator;
+import be.ugent.intec.halvade.uploader.mapreduce.FastqRecord;
+import be.ugent.intec.halvade.uploader.mapreduce.MyFastqOutputFormat;
+import be.ugent.intec.halvade.uploader.mapreduce.PairedIdWritable;
 import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
@@ -32,10 +35,19 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
+import org.apache.hadoop.io.compress.GzipCodec;
+import org.apache.hadoop.io.compress.Lz4Codec;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.seqdoop.hadoop_bam.BAMInputFormat;
+import org.seqdoop.hadoop_bam.FastqOutputFormat;
+import org.seqdoop.hadoop_bam.SequencedFragment;
 
 /**
  *
@@ -49,11 +61,13 @@ public class HalvadeUploader  extends Configured implements Tool {
     private String manifest;
     private String file1;
     private String file2;
+    private boolean BAMInput;
     private String outputDir;
     private int bestFileSize = 60000000; // <64MB
     private boolean SSE = false;
     private String profile = "default";
     private boolean fromHDFS = false;
+    private int red = 1;
     private static double advisdedHeapSize = 16;
     
     
@@ -75,7 +89,12 @@ public class HalvadeUploader  extends Configured implements Tool {
     public int run(String[] strings) throws Exception {
         try {
             parseArguments(strings);  
-            processFiles();
+            if(BAMInput){ 
+                // run mapreduce job to preprocess
+                runMapReduceJob(file1, outputDir, red);
+            } else {
+                processFiles();
+            }
         } catch (ParseException e) {
             // automatically generate the help statement
             System.err.println("Error parsing: " + e.getMessage());
@@ -85,6 +104,45 @@ public class HalvadeUploader  extends Configured implements Tool {
             Logger.THROWABLE(ex);
         }
         return 0;
+    }
+    
+    private int runMapReduceJob(String in, String out, int reducers) throws IOException, InterruptedException, ClassNotFoundException {
+        Configuration conf = getConf();
+
+        Job job = Job.getInstance(conf, "bam-prep");
+        job.setJarByClass(be.ugent.intec.halvade.uploader.mapreduce.BamRecordMapper.class);
+        FileInputFormat.addInputPath(job, new Path(in));
+        FileOutputFormat.setOutputPath(job, new Path(out));
+
+        job.setMapperClass(be.ugent.intec.halvade.uploader.mapreduce.BamRecordMapper.class);
+        job.setReducerClass(be.ugent.intec.halvade.uploader.mapreduce.FastqWriterReducer.class);
+        
+        
+        job.setOutputKeyClass(PairedIdWritable.class);
+        job.setOutputValueClass(FastqRecord.class);
+        job.setOutputFormatClass(MyFastqOutputFormat.class);
+        FastqOutputFormat.setCompressOutput(job, true);
+//        FastqOutputFormat.setOutputCompressorClass(job, Lz4Codec.class); // or GzipCodec.class
+        
+        job.setMapOutputKeyClass(PairedIdWritable.class);
+        job.setMapOutputValueClass(FastqRecord.class);
+        job.setInputFormatClass(BAMInputFormat.class);
+        
+        job.setPartitionerClass(BamIdPartitioner.class);
+        job.setSortComparatorClass(BamIdSortComparator.class);
+        job.setGroupingComparatorClass(BamIdGroupingComparator.class);
+
+        job.setNumReduceTasks(reducers);
+        
+        
+        Logger.DEBUG("Started Halvade Preprocessing");
+        Timer timer = new Timer();
+        timer.start();
+        int ret = job.waitForCompletion(true) ? 0 : 1;
+        timer.stop();
+        Logger.DEBUG("Finished Halvade Preprocessing [runtime: " + timer.getFormattedElapsedTime() + "]");
+        
+        return ret;
     }
     
     private int processFiles() throws IOException, InterruptedException, URISyntaxException, Throwable {    
@@ -230,6 +288,15 @@ public class HalvadeUploader  extends Configured implements Tool {
                                 .withDescription(  "The input data is stored on a dfs (HDFS, S3, etc) and needs to be accessed by hadoop API." )
                                 .withLongOpt("dfs")
                                 .create();
+        Option optBam = OptionBuilder.withArgName( "" )
+                                .withDescription(  "The input file given in the '-1' option is an (un)mapped bam file that needs to be remapped." )
+                                .withLongOpt("bam")
+                                .create();
+        Option optRed = OptionBuilder.withArgName( "" )
+                                .withDescription(  "Gives the number of splits the bam input file should be split in." )
+                                .hasArg()
+                                .withLongOpt("red")
+                                .create();
         
         options.addOption(optOut);
         options.addOption(optFile1);
@@ -242,12 +309,16 @@ public class HalvadeUploader  extends Configured implements Tool {
         options.addOption(optLz4);
         options.addOption(optSSE);
         options.addOption(optHDFS);
+        options.addOption(optBam);
+        options.addOption(optRed);
     }
     
     public void parseArguments(String[] args) throws ParseException {
         createOptions();
         CommandLineParser parser = new GnuParser();
         CommandLine line = parser.parse(options, args);
+        if(line.hasOption("bam"))
+            BAMInput = true;
         manifest = line.getOptionValue("1");
         if(!manifest.endsWith(".manifest")) {
             file1 = manifest;
@@ -262,6 +333,11 @@ public class HalvadeUploader  extends Configured implements Tool {
             profile = line.getOptionValue("profile");    
         if(line.hasOption("t"))
             mthreads = Integer.parseInt(line.getOptionValue("t"));
+        if(line.hasOption("red"))
+            red = Integer.parseInt(line.getOptionValue("red"));
+        else if (BAMInput) {
+            throw new ParseException("Option 'bam' requires the 'red' option.");
+        }
         if(line.hasOption("i"))
             isInterleaved = true;
         if(line.hasOption("sse"))
