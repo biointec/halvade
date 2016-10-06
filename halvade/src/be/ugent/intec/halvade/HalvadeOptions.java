@@ -118,6 +118,7 @@ public class HalvadeOptions {
     public boolean keepDups = true;
     public boolean fixQualEnc = false;
     public String stargtf = null;
+    public boolean skipBQSR = false;
 
     protected DecimalFormat onedec;
     protected static final double REDUCE_TASKS_FACTOR = 1.68 * 15;
@@ -161,6 +162,7 @@ public class HalvadeOptions {
             HalvadeConf.setOutDir(hConf, out);
             HalvadeConf.setKeepFiles(hConf, keepFiles);
             HalvadeConf.setKeepBamFiles(hConf, keepBamFiles);
+            HalvadeConf.setSkipBQSR(hConf, skipBQSR);
             HalvadeConf.setFilterDBSnp(hConf, filterDBSnp);
             HalvadeConf.clearTaskFiles(hConf);
             HalvadeConf.setUseElPrep(hConf, useElPrep);
@@ -364,7 +366,6 @@ public class HalvadeOptions {
                 .create();
         Option optSites = OptionBuilder.withArgName("snpDBa,snpDBb")
                 .hasArg()
-                .isRequired(true)
                 .withDescription("Name of snpDB files for the genome on HDFS. If multiple separate with \',\'.")
                 .create("D");
         Option optStarGenome = OptionBuilder.withArgName("stargenome")
@@ -552,6 +553,9 @@ public class HalvadeOptions {
         Option optFixEnc = OptionBuilder.withDescription("Fix the quality encoding of old (pre 1.8) Illumina fastq files to the new encoding.")
                 .withLongOpt("illumina")
                 .create();
+        Option optSkipBQSR = OptionBuilder.withDescription("Skip the BQSR step if no dbSNP is available.")
+                .withLongOpt("skip_bqsr")
+                .create();
 
         options.addOption(optIn);
         options.addOption(optOut);
@@ -608,6 +612,7 @@ public class HalvadeOptions {
         options.addOption(optKeepBam);
         options.addOption(optSnappy);
         options.addOption(optSplitNTrim);
+        options.addOption(optSkipBQSR);
     }
 
     protected boolean parseArguments(String[] args, Configuration halvadeConf) throws ParseException {
@@ -621,7 +626,8 @@ public class HalvadeOptions {
             out += "/";
         }
         ref = line.getOptionValue("R");
-        sites = line.getOptionValue("D");
+        if (line.hasOption("D"))
+            sites = line.getOptionValue("D");
         halvadeBinaries = line.getOptionValue("B");
         hdfsSites = sites.split(",");
         if (line.hasOption("bam")) {
@@ -629,6 +635,11 @@ public class HalvadeOptions {
         }
         if (line.hasOption("snappy")) {
             snappy = true;
+        }
+        if (line.hasOption("skip_bqsr")) {
+            skipBQSR = true;
+        } else if (sites == null) {
+            throw new ParseException("The '-D' option is required if the '-skip_bqsr' option is not given.");
         }
         if (line.hasOption("rna")) {
             rnaPipeline = true;

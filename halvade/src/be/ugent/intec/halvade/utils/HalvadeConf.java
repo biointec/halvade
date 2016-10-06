@@ -615,6 +615,14 @@ public class HalvadeConf {
     public static boolean getSplitNTrim(Configuration conf) {
         return conf.getBoolean(splitntrim, false);
     }
-
+    
+    private static final String skipBQSR= "skipBQSR";
+    public static void setSkipBQSR(Configuration conf, boolean val) {
+        conf.setBoolean(skipBQSR, val);
+    }
+    
+    public static boolean getSkipBQSR(Configuration conf) {
+        return conf.getBoolean(skipBQSR, false);
+    }
 
 }

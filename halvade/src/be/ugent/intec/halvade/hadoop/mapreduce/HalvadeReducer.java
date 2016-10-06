@@ -64,6 +64,7 @@ public class HalvadeReducer extends Reducer<ChromosomeRegion, SAMRecordWritable,
     protected boolean keepBam = false;
     protected SAMReadGroupRecord bamrg;
     protected String outputdir;
+    protected boolean skipBQSR = false;
     
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
@@ -144,6 +145,7 @@ public class HalvadeReducer extends Reducer<ChromosomeRegion, SAMRecordWritable,
         taskId = context.getTaskAttemptID().toString();
         taskId = taskId.substring(taskId.indexOf("r_"));
         taskNr = Integer.parseInt(taskId.split("_")[1]);
+        skipBQSR = HalvadeConf.getSkipBQSR(context.getConfiguration());
         outputdir = HalvadeConf.getOutDir(context.getConfiguration());
         updateRG = HalvadeConf.getUpdateReadGroup(context.getConfiguration());
         if(inputIsBam && !updateRG) {

@@ -61,8 +61,13 @@ public class DnaGATKReducer extends GATKReducer {
         } else {
             indelRealignment(context, region, gatk, preprocess, tmpFile1);  
         }      
-        baseQualityScoreRecalibration(context, region, r, tools, gatk, tmpFile1, tmpFile2);        
-        DnaVariantCalling(context, region, gatk, tmpFile2, snps);
+        
+        if(skipBQSR) {
+            baseQualityScoreRecalibration(context, region, r, tools, gatk, tmpFile1, tmpFile2);        
+            DnaVariantCalling(context, region, gatk, tmpFile2, snps);
+        } else {  
+            DnaVariantCalling(context, region, gatk, tmpFile1, snps);            
+        }
         variantFiles.add(snps);
            
         HalvadeFileUtils.removeLocalFile(region);
