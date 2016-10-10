@@ -148,7 +148,9 @@ public class HalvadeOptions {
             if (STARGenome != null) {
                 HalvadeConf.setStarDirOnHDFS(hConf, STARGenome);
             }
-            HalvadeConf.setKnownSitesOnHDFS(hConf, hdfsSites);
+            if(hdfsSites != null) {
+                HalvadeConf.setKnownSitesOnHDFS(hConf, hdfsSites);
+            }
             HalvadeConf.setIsPaired(hConf, paired);
             HalvadeConf.setIsRNA(hConf, rnaPipeline);
             if (bedFile != null) {
@@ -626,10 +628,11 @@ public class HalvadeOptions {
             out += "/";
         }
         ref = line.getOptionValue("R");
-        if (line.hasOption("D"))
+        if (line.hasOption("D")) {
             sites = line.getOptionValue("D");
+            hdfsSites = sites.split(",");
+        }
         halvadeBinaries = line.getOptionValue("B");
-        hdfsSites = sites.split(",");
         if (line.hasOption("bam")) {
             useBamInput = true;
         }
