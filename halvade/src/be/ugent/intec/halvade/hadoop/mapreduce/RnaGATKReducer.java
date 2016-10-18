@@ -53,10 +53,10 @@ public class RnaGATKReducer extends GATKReducer {
         splitNTrim(context, region, gatk, preprocess, tmpFile1, true);
         indelRealignment(context, region, gatk, tmpFile1, tmpFile2);    
         if(skipBQSR) {    
+            RnaVariantCalling(context, region, gatk, tmpFile2, snps);     
+        } else {   
             baseQualityScoreRecalibration(context, region, r, tools, gatk, tmpFile2, tmpFile3);        
-            RnaVariantCalling(context, region, gatk, tmpFile3, snps);
-        } else {       
-            RnaVariantCalling(context, region, gatk, tmpFile2, snps);            
+            RnaVariantCalling(context, region, gatk, tmpFile3, snps);           
         }
         
 //        // filter/annotate??       

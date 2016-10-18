@@ -57,5 +57,10 @@ public class FastqRecord implements Writable {
         read = di.readUTF();
         qual = di.readUTF();
     }
+
+    @Override
+    public String toString() {
+        return "FastqRecord{" + "id=" + id + ", read=" + read + ", qual=" + qual + '}';
+    }
     
 }

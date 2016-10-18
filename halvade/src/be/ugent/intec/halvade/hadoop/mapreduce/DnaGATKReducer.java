@@ -63,10 +63,10 @@ public class DnaGATKReducer extends GATKReducer {
         }      
         
         if(skipBQSR) {
+            DnaVariantCalling(context, region, gatk, tmpFile1, snps);  
+        } else {            
             baseQualityScoreRecalibration(context, region, r, tools, gatk, tmpFile1, tmpFile2);        
             DnaVariantCalling(context, region, gatk, tmpFile2, snps);
-        } else {  
-            DnaVariantCalling(context, region, gatk, tmpFile1, snps);            
         }
         variantFiles.add(snps);
            

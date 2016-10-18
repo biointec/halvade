@@ -53,5 +53,9 @@ public class PairedIdWritable implements WritableComparable {
     public int compareTo(Object o) {
         return ((PairedIdWritable)o).getIdHashCode() - idHashCode;
     }
-    
+
+    @Override
+    public String toString() {
+        return "PairedIdWritable{" + "idHashCode=" + idHashCode + ", id=" + id + '}';
+    }
 }

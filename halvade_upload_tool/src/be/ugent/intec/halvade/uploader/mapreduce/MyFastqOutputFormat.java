@@ -76,6 +76,7 @@ public class MyFastqOutputFormat extends TextOutputFormat<PairedIdWritable, Fast
             qual.set(v.getQual());
             seq.setSequence(sequence);
             seq.setQuality(qual);
+//            System.err.println("writing: "+ v);
             
             
             // write the id line
