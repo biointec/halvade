@@ -34,15 +34,16 @@ public class BWAMemInstance extends AlignerInstance {
     private static BWAMemInstance instance;
     private ProcessBuilderWrapper pbw;
     private SAMStreamHandler ssh;
+    private String taskId;
     /**
      * 
      * This BWA instance runs BWA from stdin (custom provided BWA is needed)
      */
     private BWAMemInstance(Context context, String bin, int task) throws IOException, URISyntaxException {
         super(context, bin, task);
-        String taskid = context.getTaskAttemptID().toString();
-        taskid = taskid.substring(taskid.indexOf("m_"));
-        ref = HalvadeFileUtils.downloadBWAIndex(context, taskid);
+        taskId = context.getTaskAttemptID().toString();
+        taskId = taskId.substring(taskId.indexOf("m_"));
+        ref = HalvadeFileUtils.downloadBWAIndex(context, taskId);
     }
     
     public int feedLine(String line) throws IOException  {

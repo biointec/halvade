@@ -242,6 +242,7 @@ public class HalvadeFileUtils {
     protected static String REF_LOCK = "down_ref.lock";
     protected static String GFF_LOCK = "down_gff.lock";
     protected static String STARG_LOCK = "down_starg.lock";
+    protected static String STARG2_LOCK = "down_starg2.lock";
     protected static String DBSNP_LOCK = "down_snpdb.lock";
     
     
@@ -367,7 +368,7 @@ public class HalvadeFileUtils {
         }
         if(refBase == null)
             refBase = findFile(refDir, refSuffix, false);
-        return refBase + refFiles[0];
+        return refBase + refFiles[0]; // reffiles[0] = .fasta
     }
     
     public static String downloadGATKIndex(TaskInputOutputContext context, String id) throws IOException, URISyntaxException {
@@ -445,7 +446,7 @@ public class HalvadeFileUtils {
         String tmpDir = HalvadeConf.getScratchTempDir(conf);
         String refDir = HalvadeConf.getRefDirOnScratch(conf);
         if(!refDir.endsWith("/")) refDir = refDir + "/";
-        HalvadeFileLock lock = new HalvadeFileLock(context, tmpDir, STARG_LOCK);
+        HalvadeFileLock lock = new HalvadeFileLock(context, tmpDir, usePass2Genome ? STARG2_LOCK : STARG_LOCK );
         String Halvade_Star_Suffix_P2 = HalvadeConf.getPass2Suffix(context.getConfiguration());
         String refBase = null;
         try {
