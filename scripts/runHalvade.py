@@ -8,7 +8,7 @@ import sys
 halvade = "halvade.config"
 arguments = "halvade_run.config"
 jar = "HalvadeWithLibs.jar"
-s3logging = "s3://itx-abt-jnj-exasci/ddecap/halvade/logs/"
+s3logging = "s3://bucket-name/ddecap/halvade/logs/"
 emr_config = dict()
 config = dict()
 flags = dict()
