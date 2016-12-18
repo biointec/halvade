@@ -92,3 +92,8 @@ To use Halvade on Amazon EMR an AMI version of 3.1.0 or newer should be used. Ad
 
 The ``tmp`` option is updated to point to the local SSD's on the Amazon EMR nodes, which are mounted in the ``/mnt/`` folder.
 
+Additionally to run the script the default EMR need to be created in order to work, run this command:
+
+.. code-block:: bash
+	aws emr create-default-roles
+	
