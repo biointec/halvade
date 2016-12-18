@@ -3,7 +3,7 @@
 import subprocess
 import os
 import sys
-
+from subprocess import call
 
 halvade = "halvade.config"
 arguments = "halvade_run.config"
@@ -119,7 +119,7 @@ if "emr_type" in emr_config:
 	argsString = argsString[:-1]+"]"
 	argsArray.append("Name=Halvade,Jar="+emr_config["emr_jar"]+",ActionOnFailure=TERMINATE_CLUSTER,Args="+argsString)
 	print argsArray
-        spawnDaemon(argsArray)
+        call(argsArray)
 
 else:
 	print "Running Halvade on local cluster:"
