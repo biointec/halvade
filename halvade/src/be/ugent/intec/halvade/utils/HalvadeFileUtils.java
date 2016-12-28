@@ -268,7 +268,7 @@ public class HalvadeFileUtils {
          "Genome", "genomeParameters.txt", "SA", "SAindex"};
     protected static String[] STAR_REF_OPTIONAL_FILES =  {"sjdbInfo.txt", "sjdbList.out.tab"};
     
-    protected static String findFile(String directory, String suffix, boolean recursive) {
+    public static String findFile(String directory, String suffix, boolean recursive) {
         File dir  = new File(directory);
         if(dir.isDirectory() && dir.listFiles() != null) {
             String foundPrefix = null;
@@ -445,6 +445,7 @@ public class HalvadeFileUtils {
         Configuration conf = context.getConfiguration();
         String tmpDir = HalvadeConf.getScratchTempDir(conf);
         String refDir = HalvadeConf.getRefDirOnScratch(conf);
+        boolean requireUploadToHDFS = !HalvadeConf.getRefDirIsSet(context.getConfiguration());
         if(!refDir.endsWith("/")) refDir = refDir + "/";
         HalvadeFileLock lock = new HalvadeFileLock(context, tmpDir, usePass2Genome ? STARG2_LOCK : STARG_LOCK );
         String Halvade_Star_Suffix_P2 = HalvadeConf.getPass2Suffix(context.getConfiguration());
@@ -467,13 +468,13 @@ public class HalvadeFileUtils {
                     refBase = findFile(refDir, usePass2Genome ? Halvade_Star_Suffix_P2 : HALVADE_STAR_SUFFIX_P1, true);
                     boolean foundExisting = (refBase != null);
                     if (!foundExisting) {
-                        refBase = refDir + id + "-star/";
+                        refBase = refDir + id + "-star" + (usePass2Genome ? "2" : "1") + "/";
                         //make dir
                         File makeRefDir = new File (refBase);
                         makeRefDir.mkdir();
                     }
                     Logger.DEBUG("STAR dir: " + refBase);
-                    if(!usePass2Genome) {
+                    if(!usePass2Genome || requireUploadToHDFS) {
                         for (String suffix : STAR_REF_FILES) {
                             attemptDownloadFileFromHDFS(context, fs, HDFSRef + suffix, refBase + suffix, RETRIES);                
                         }
@@ -500,13 +501,13 @@ public class HalvadeFileUtils {
                 refBase = findFile(refDir, usePass2Genome ? Halvade_Star_Suffix_P2 : HALVADE_STAR_SUFFIX_P1, true);
                 boolean foundExisting = (refBase != null);
                 if (!foundExisting) {
-                    refBase = refDir + id + "-star/";
+                    refBase = refDir + id + "-star" + (usePass2Genome ? "2" : "1") + "/";
                     //make dir
                     File makeRefDir = new File (refBase);
                     makeRefDir.mkdir();
                 }
                 Logger.DEBUG("STAR dir: " + refBase);
-                if(!usePass2Genome) {
+                if(!usePass2Genome || requireUploadToHDFS) {
                     for (String suffix : STAR_REF_FILES) {
                         attemptDownloadFileFromHDFS(context, fs, HDFSRef + suffix, refBase + suffix, RETRIES);                
                     }
@@ -658,7 +659,10 @@ public class HalvadeFileUtils {
     public static boolean removeLocalFile(boolean keep, String filename) {
         if(keep) return false;
         File f = new File(filename);
-        return f.exists() && f.delete();
+        long size = f.length();
+        boolean res = f.exists() && f.delete();
+        Logger.DEBUG((res ? "successfully deleted ": "failed to delete ") + "\"" + filename + "\" [" + (size / 1024 / 1024)+ "Mb]");
+        return res;
     }
     
     public static boolean removeLocalFile(String filename, TaskInputOutputContext context, HalvadeCounters counter) {
@@ -669,9 +673,11 @@ public class HalvadeFileUtils {
         if(keep) return false;
         File f = new File(filename);
         if(f.exists()) context.getCounter(counter).increment(f.length());
-        return f.exists() && f.delete();
+        long size = f.length();
+        boolean res = f.exists() && f.delete();
+        Logger.DEBUG((res ? "successfully deleted ": "failed to delete ") + "\"" + filename + "\" [" + (size / 1024 / 1024)+ "Mb]");
+        return res;
     }
-    
     
     public static boolean removeLocalDir(String filename) {
         return removeLocalDir(false, filename);
@@ -679,7 +685,10 @@ public class HalvadeFileUtils {
     public static boolean removeLocalDir(boolean keep, String filename) {
         if(keep) return false;
         File f = new File(filename);
-        return f.exists() && deleteDir(f); // f.delete();
+        long size = getFolderSize(f);
+        boolean res = f.exists() && deleteDir(f);
+        Logger.DEBUG((res ? "successfully deleted ": "failed to delete ") + "\"" + filename + "\" [" + (size / 1024 / 1024)+ "Mb]");
+        return res; 
     }
     public static  boolean removeLocalDir(String filename, TaskInputOutputContext context, HalvadeCounters counter) {
         return removeLocalDir(false, filename, context, counter);
@@ -688,9 +697,26 @@ public class HalvadeFileUtils {
         if(keep) return false;
         File f = new File(filename);
         if(f.exists()) context.getCounter(counter).increment(f.length());
-        return f.exists() && deleteDir(f); // f.delete();
+        long size = getFolderSize(f);
+        boolean res = f.exists() && deleteDir(f);
+        Logger.DEBUG((res ? "successfully deleted ": "failed to delete ") + "\"" + filename + "\" [" + (size / 1024 / 1024)+ "Mb]");
+        return res; 
     } 
+    	
+    protected static long getFolderSize(File dir) {
+        long size = 0;
+        for (File file : dir.listFiles()) {
+            if (file.isFile()) {
+                System.out.println(file.getName() + " " + file.length());
+                size += file.length();
+            }
+            else
+                size += getFolderSize(file);
+        }
+        return size;
+    }
     protected static  boolean deleteDir(File dir) {
+        // check tmp dir filesize:
     	if(dir.exists()) {
     		File[] files = dir.listFiles();
     		if(files != null) {

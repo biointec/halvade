@@ -52,11 +52,13 @@ public class PreprocessingTools {
     Reducer.Context context = null;
     ArrayList<String> java;
     String mem = "-Xmx2g";
+    String javaTmpdir = "-Djava.io.tmpdir=";
 
     public void setContext(Reducer.Context context) {
         this.context = context;
         mem = "-Xmx" + (int)(0.8*Integer.parseInt(context.getConfiguration().get("mapreduce.reduce.memory.mb"))) + "m";
 //        mem = context.getConfiguration().get("mapreduce.reduce.java.opts");
+        java.add(javaTmpdir + HalvadeConf.getScratchTempDir(context.getConfiguration()) + "javatmp/");
         String customArgs = HalvadeConf.getCustomArgs(context.getConfiguration(), "java", "");  
         if(customArgs != null)
             java.add(customArgs);

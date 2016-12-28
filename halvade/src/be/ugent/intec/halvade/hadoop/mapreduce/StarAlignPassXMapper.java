@@ -24,7 +24,7 @@ import org.apache.hadoop.io.Text;
  */
 public class StarAlignPassXMapper  extends HalvadeMapper<GenomeSJ, Text> {
     protected String tmpDir;
-    protected boolean runPass2;
+    protected boolean runPass2, keep;
     protected final String SH_MEM_LOCK = "load_sh_mem.lock";
     protected static final int PASS1_LOCK_VAL = 1;
     protected static final int PASS2_LOCK_VAL = 2;
@@ -58,6 +58,7 @@ public class StarAlignPassXMapper  extends HalvadeMapper<GenomeSJ, Text> {
     protected void setup(Context context) throws IOException, InterruptedException {
         super.setup(context);
         sj = new GenomeSJ();
+        keep = HalvadeConf.getKeepFiles(context.getConfiguration());
         tmpDir = HalvadeConf.getScratchTempDir(context.getConfiguration());
         star_shmem_lock = new HalvadeFileLock(context, tmpDir, SH_MEM_LOCK);
         try {
@@ -86,7 +87,9 @@ public class StarAlignPassXMapper  extends HalvadeMapper<GenomeSJ, Text> {
                     String taskId = context.getTaskAttemptID().toString();
                     taskId = taskId.substring(taskId.indexOf("m_"));
                     String starGen = HalvadeFileUtils.downloadSTARIndex(context, taskId, false); // to free 1 ref from memory so -> dont need to check which to load
-                    ((STARInstance)instance).loadSharedMemoryReference(starGen, true); // unload other first
+                    ((STARInstance)instance).loadSharedMemoryReference(starGen, true); // unload first ref first
+                    // remove the files of the first reference!
+                    HalvadeFileUtils.removeLocalDir(keep, starGen);
                     ((STARInstance)instance).loadSharedMemoryReference(null, false);
                     bytes.clear();
                     bytes.putInt(runPass2 ? PASS2_LOCK_VAL : PASS1_LOCK_VAL).flip();

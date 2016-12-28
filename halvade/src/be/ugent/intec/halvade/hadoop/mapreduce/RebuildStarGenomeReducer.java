@@ -53,7 +53,7 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
     protected String jobId;
     protected int overhang = 100, threads;
     protected long mem;
-    protected boolean requireUploadToHDFS = false;
+    protected boolean requireUploadToHDFS = false, keep;
     protected int totalValCount;
     protected int totalKeyCount;
     protected ArrayList<Integer> keyFactors;
@@ -123,12 +123,13 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
             for(File gen : genFiles) {
                 HalvadeFileUtils.uploadFileToHDFS(context, fs, gen.getAbsolutePath(), pass2GenDir + gen.getName());
             }
+//            HalvadeFileUtils.removeLocalDir(keep, newGenomeDir);
             Logger.DEBUG("Finished uploading new reference to " + pass2GenDir);
-        } else {
-            File pass2check = new File(newGenomeDir + HalvadeConf.getPass2Suffix(context.getConfiguration()));
-            pass2check.createNewFile();
-            Logger.DEBUG("create check file: " + pass2check.getAbsolutePath());
         }
+        // avoid downloading this ref to the node its been created to save space!
+        File pass2check = new File(newGenomeDir + HalvadeConf.getPass2Suffix(context.getConfiguration()));
+        pass2check.createNewFile();
+        Logger.DEBUG("create check file: " + pass2check.getAbsolutePath());
         HalvadeFileUtils.removeLocalFile(mergeJS);
     }
 
@@ -139,6 +140,7 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
         keyFactors = new ArrayList<>();
         tmpDir = HalvadeConf.getScratchTempDir(context.getConfiguration());
         refDir = HalvadeConf.getRefDirOnScratch(context.getConfiguration());
+        keep = HalvadeConf.getKeepFiles(context.getConfiguration());
         requireUploadToHDFS = !HalvadeConf.getRefDirIsSet(context.getConfiguration());
         out = HalvadeConf.getOutDir(context.getConfiguration()); 
         jobId = context.getJobID().toString();

@@ -90,12 +90,10 @@ public class HalvadeOptions {
     public int reducerContainersPerNode = -1;
     public int mapContainersPerNode = -1;
     public boolean justAlign = false;
-    ;
     public boolean mergeBam = false;
     public String bedFile = null;
     public String filterBed = null;
     public String bedRegion = null;
-//    public double coverage = -1.0;
     public String halvadeBinaries;
     public String bin;
     public String readCountsPerRegionFile = null;
@@ -138,7 +136,9 @@ public class HalvadeOptions {
             }
             onedec = new DecimalFormat("###0.0");
             // add parameters to configuration:
-            HalvadeConf.setRefDirIsSet(hConf, localRefDir != null);
+            HalvadeConf.setRefDirIsSet(hConf, (localRefDir != null || nodes > 1)); // true -> requires upload!
+            if(rnaPipeline) 
+                Logger.DEBUG("requires star genome 2 upload? " + (localRefDir != null || nodes > 1));
             if (localRefDir == null) {
                 localRefDir = tmpDir;
             }

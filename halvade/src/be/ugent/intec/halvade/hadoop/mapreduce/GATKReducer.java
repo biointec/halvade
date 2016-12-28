@@ -160,7 +160,7 @@ public abstract class GATKReducer extends HalvadeReducer {
         outHeader.setSortOrder(SAMFileHeader.SortOrder.coordinate);
         // tmp files
         String tmpOut1 = tmpFileBase + "-p1.bam";
-        String tmpOut2 = tmpFileBase + "-p2.bam";
+//        String tmpOut2 = tmpFileBase + "-p2.bam";
         String tmpOut3 = tmpFileBase + "-p3.sam";
         String fCounts = tmpFileBase + "-features.count";
         String tmpMetrics = tmpFileBase + "-p3-metrics.txt";
@@ -197,6 +197,8 @@ public abstract class GATKReducer extends HalvadeReducer {
         Logger.DEBUG("mark duplicates");
         context.setStatus("mark duplicates");
         tools.runMarkDuplicates(tmpOut1, gff != null ? tmpOut3 : output, tmpMetrics, keepDups);
+        HalvadeFileUtils.removeLocalFile(keep, tmpMetrics, context, HalvadeCounters.FOUT_GATK_TMP);
+        HalvadeFileUtils.removeLocalFile(keep, tmpOut1, context, HalvadeCounters.FOUT_GATK_TMP);
 
         if (gff != null) {
             // tmpOut3 is sam for htseq count!        
@@ -218,8 +220,6 @@ public abstract class GATKReducer extends HalvadeReducer {
         Logger.DEBUG("estimated time: " + estimatedTime / 1000);
 
         // remove all temporary files now!
-        HalvadeFileUtils.removeLocalFile(keep, tmpMetrics, context, HalvadeCounters.FOUT_GATK_TMP);
-        HalvadeFileUtils.removeLocalFile(keep, tmpOut1, context, HalvadeCounters.FOUT_GATK_TMP);
 //        HalvadeFileUtils.removeLocalFile(keep, tmpOut2, context, HalvadeCounters.FOUT_GATK_TMP);
         HalvadeFileUtils.removeLocalFile(keep, tmpOut3, context, HalvadeCounters.FOUT_GATK_TMP);
         HalvadeFileUtils.removeLocalFile(keep, fCounts);

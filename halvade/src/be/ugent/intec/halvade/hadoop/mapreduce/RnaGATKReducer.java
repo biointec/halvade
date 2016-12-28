@@ -17,6 +17,7 @@ import be.ugent.intec.halvade.utils.SAMRecordIterator;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  *
@@ -27,6 +28,7 @@ public class RnaGATKReducer extends GATKReducer {
     @Override
     protected void processAlignments(Iterable<SAMRecordWritable> values, Context context, PreprocessingTools tools, GATKTools gatk) throws IOException, InterruptedException, URISyntaxException, QualityException {
         long startTime = System.currentTimeMillis();
+        removeStarGen2IfPresent(context.getConfiguration());
         // temporary files
         String region = tmpFileBase + "-region.intervals";
         String preprocess = tmpFileBase + ".bam";
@@ -72,6 +74,15 @@ public class RnaGATKReducer extends GATKReducer {
         HalvadeFileUtils.removeLocalFile(region);
         long estimatedTime = System.currentTimeMillis() - startTime;
         Logger.DEBUG("total estimated time: " + estimatedTime / 1000);
+    }
+    private void removeStarGen2IfPresent(Configuration conf) {
+        // check if star dir is present in /tmp/:
+        String starGen = null;
+        String Halvade_Star_Suffix_P2 = HalvadeConf.getPass2Suffix(conf);
+        starGen = HalvadeFileUtils.findFile(tmp, Halvade_Star_Suffix_P2 , true);
+        if(starGen != null) {
+            HalvadeFileUtils.removeLocalDir(keep, starGen);
+        }
     }
     
 }
