@@ -24,6 +24,7 @@ import java.util.Arrays;
 import be.ugent.intec.halvade.utils.ProcessBuilderWrapper;
 import be.ugent.intec.halvade.utils.Logger;
 import be.ugent.intec.halvade.utils.HalvadeConf;
+import be.ugent.intec.halvade.utils.HalvadeFileUtils;
 import java.text.DecimalFormat;
 import java.util.Collections;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -41,11 +42,13 @@ public class GATKTools {
     String gatk;
     ArrayList<String> java;
     String mem = "-Xmx2g";
+    String tmp = null;
     int threadingType = 0; // [default] 0 = data multithreading (1 = cpu multithreading)
     int threads = 1; 
     String[] multiThreadingTypes = {"-nt", "-nct"};
     DecimalFormat onedec;
     Reducer.Context context;
+    String javaTmpdir = "-Djava.io.tmpdir=";
     
     public void setThreads(int threads) {
         this.threads = threads;
@@ -58,6 +61,8 @@ public class GATKTools {
     public void setContext(Reducer.Context context) {
         this.context = context;
 //        mem = context.getConfiguration().get("mapreduce.reduce.java.opts");
+        tmp = HalvadeConf.getScratchTempDir(context.getConfiguration());
+        java.add(javaTmpdir + tmp + "javatmp/");
         mem = "-Xmx" + (int)(0.8*Integer.parseInt(context.getConfiguration().get("mapreduce.reduce.memory.mb"))) + "m";
         String customArgs = HalvadeConf.getCustomArgs(context.getConfiguration(), "java", ""); 
         if(customArgs != null)
@@ -454,6 +459,8 @@ public class GATKTools {
     }
     
     private long runProcessAndWait(String name, String[] command) throws InterruptedException {
+        // check tmp size for debugging!
+        Logger.DEBUG("current tmp folder size: " + (HalvadeFileUtils.getFolderSize(tmp)/1024/1024));
         long startTime = System.currentTimeMillis();
 //        HalvadeHeartBeat hhb = new HalvadeHeartBeat(context);
 //        hhb.start();

@@ -703,6 +703,10 @@ public class HalvadeFileUtils {
         return res; 
     } 
     	
+    public static long getFolderSize(String dir) {
+        File d = new File(dir);
+        return getFolderSize(d);
+    }
     protected static long getFolderSize(File dir) {
         long size = 0;
         for (File file : dir.listFiles()) {
