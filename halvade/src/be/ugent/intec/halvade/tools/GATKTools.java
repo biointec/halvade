@@ -460,7 +460,7 @@ public class GATKTools {
     
     private long runProcessAndWait(String name, String[] command) throws InterruptedException {
         // check tmp size for debugging!
-        Logger.DEBUG("current tmp folder size: " + (HalvadeFileUtils.getFolderSize(tmp)/1024/1024));
+        Logger.DEBUG("current tmp folder size: " + (HalvadeFileUtils.getFolderSize(tmp)/1024/1024), 3);
         long startTime = System.currentTimeMillis();
 //        HalvadeHeartBeat hhb = new HalvadeHeartBeat(context);
 //        hhb.start();
