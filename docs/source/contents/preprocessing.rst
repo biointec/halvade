@@ -27,6 +27,7 @@ The manifest file if used, contains per line a pair of files (reads1 and reads2)
 
 .. code-block:: bash
 	:linenos:
+	
 	/path/to/file1_reads1.fq.gz	/path/to/file1_reads2.fq.gz
 	/path/to/file2_reads1.fq.gz	/path/to/file2_reads2.fq.gz
 
