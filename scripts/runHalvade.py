@@ -93,7 +93,10 @@ if "emr_type" in emr_config:
 	argsArray.append("--use-default-roles")
 	argsArray.append("--instance-groups")
 	argsArray.append("--instance-groups")
-	argsArray.append("InstanceGroupType=MASTER,InstanceType=m1.medium,InstanceCount=1" +" InstanceGroupType=CORE,InstanceType="+emr_config["emr_type"]+",InstanceCount="+config["nodes"])
+	if "nodes" in config:
+		argsArray.append("InstanceGroupType=MASTER,InstanceType=m1.medium,InstanceCount=1" +" InstanceGroupType=CORE,InstanceType="+emr_config["emr_type"]+",InstanceCount="+config["nodes"])
+	else:
+		argsArray.append("InstanceGroupType=MASTER,InstanceType=m1.medium,InstanceCount=1" +" InstanceGroupType=CORE,InstanceType="+emr_config["emr_type"]+",InstanceCount="+config["N"])
 	argsArray.append("--enable-debugging")
 	argsArray.append("--ami-version")
 	argsArray.append(emr_config["emr_ami_v"])
