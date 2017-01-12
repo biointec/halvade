@@ -84,14 +84,12 @@ if "emr_type" in emr_config:
 		emr_mem = int(config["M"])*1024
 	timeout = 10800000 #3h
 	hadoopArgs="[-y,yarn.scheduler.maximum-allocation-mb=%d,-y,yarn.nodemanager.resource.memory-mb=%d,-m,mapreduce.job.reduce.slowstart.completedmaps=1.0,-m,mapreduce.task.timeout=%d]" %(emr_mem, emr_mem,timeout)
-	print hadoopArgs
 	argsArray = []
 	argsArray.append("aws")
 	argsArray.append("emr")
 	argsArray.append("create-cluster")
 	argsArray.append("--auto-terminate")
 	argsArray.append("--use-default-roles")
-	argsArray.append("--instance-groups")
 	argsArray.append("--instance-groups")
 	if "nodes" in config:
 		argsArray.append("InstanceGroupType=MASTER,InstanceType=m1.medium,InstanceCount=1" +" InstanceGroupType=CORE,InstanceType="+emr_config["emr_type"]+",InstanceCount="+config["nodes"])
