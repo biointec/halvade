@@ -592,10 +592,10 @@ public class HalvadeConf {
     }
     
     private static final String refDirIsSet = "refDirIsSet";
-    public static void setRefDirIsSet(Configuration conf, boolean val) {
+    public static void setRequireRefUpload(Configuration conf, boolean val) {
         conf.setBoolean(refDirIsSet, val);
     }
-    public static boolean getRefDirIsSet(Configuration conf) {
+    public static boolean getRequireRefUpload(Configuration conf) {
         return conf.getBoolean(refDirIsSet, false);
     }
     

@@ -5,10 +5,7 @@ import os
 import sys
 from subprocess import call
 
-halvade = "halvade.config"
-arguments = "halvade_run.config"
 jar = "HalvadeWithLibs.jar"
-s3logging = "s3://bucket-name/ddecap/halvade/logs/"
 emr_config = dict()
 config = dict()
 flags = dict()
@@ -81,7 +78,7 @@ print jar
 if "emr_type" in emr_config:
 	print "Running Halvade on Amazon EMR:"
 	emr_mem = int(config["mem"])*1024
-	timeout = 1800000
+	timeout = 10800000 #3h
 	hadoopArgs="[-y,yarn.scheduler.maximum-allocation-mb=%d,-y,yarn.nodemanager.resource.memory-mb=%d,-m,mapreduce.job.reduce.slowstart.completedmaps=1.0,-m,mapreduce.task.timeout=%d]" %(emr_mem, emr_mem,timeout)
 	print hadoopArgs
 	argsArray = []
@@ -89,18 +86,18 @@ if "emr_type" in emr_config:
 	argsArray.append("emr")
 	argsArray.append("create-cluster")
 	argsArray.append("--auto-terminate")
-	argsArray.append("--instance-type")
-	argsArray.append(emr_config["emr_type"])
-	argsArray.append("--instance-count")
-	argsArray.append(config["nodes"])
+	argsArray.append("--use-default-roles")
+	argsArray.append("--instance-groups")
+	argsArray.append("--instance-groups")
+	argsArray.append("InstanceGroupType=MASTER,InstanceType=m1.medium,InstanceCount=1" +" InstanceGroupType=CORE,InstanceType="+emr_config["emr_type"]+",InstanceCount="+config["nodes"])
 	argsArray.append("--enable-debugging")
 	argsArray.append("--ami-version")
 	argsArray.append(emr_config["emr_ami_v"])
-	argsArray.append("--log-uri")
-	argsArray.append(s3logging)
+	if "emr_s3logging" in emr_config:
+		argsArray.append("--log-uri")
+		argsArray.append(emr_config["emr_s3logging"])
         argsArray.append("--bootstrap-actions")
-        argsArray.append("Path=s3://elasticmapreduce/bootstrap-actions/configure-hadoop,Name=configuration,Args="+hadoopArgs+ ",Path="+emr_config["emr_script"]+",Name=maketmpdir")
-	argsArray.append("--steps")
+        argsArray.append("Path=s3://elasticmapreduce/bootstrap-actions/configure-hadoop,"+"Name=configuration,Args="+hadoopArgs+",Path="+emr_config["emr_script"]+",Name=maketmpdir")
 	argsString ="["
         for key in config:
 				if (len(key) > 1):
@@ -117,9 +114,9 @@ if "emr_type" in emr_config:
                 argsString+="--CA,"
                 argsString+=key+"="+custom_args[key]+","
 	argsString = argsString[:-1]+"]"
-	argsArray.append("Name=Halvade,Jar="+emr_config["emr_jar"]+",ActionOnFailure=TERMINATE_CLUSTER,Args="+argsString)
-	print argsArray
-        call(argsArray)
+	argsArray.append("--steps")
+	argsArray.append("Type=CUSTOM_JAR,Name=Halvade,Jar="+emr_config["emr_jar"]+",ActionOnFailure=TERMINATE_CLUSTER,Args="+argsString)
+	subprocess.Popen(argsArray)
 
 else:
 	print "Running Halvade on local cluster:"

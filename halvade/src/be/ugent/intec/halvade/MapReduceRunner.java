@@ -104,7 +104,7 @@ public class MapReduceRunner extends Configured implements Tool  {
     
     protected int runPass1RNAJob(Configuration pass1Conf, String tmpOutDir) throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException {
         HalvadeConf.setIsPass2(pass1Conf, false);
-        HalvadeResourceManager.setJobResources(halvadeOpts, pass1Conf, HalvadeResourceManager.RNA_SHMEM_PASS1, halvadeOpts.nodes == 1, halvadeOpts.useBamInput);
+        HalvadeResourceManager.setJobResources(halvadeOpts, pass1Conf, HalvadeResourceManager.RNA_SHMEM_PASS1, !halvadeOpts.runsOnS3 && halvadeOpts.nodes == 1, halvadeOpts.useBamInput);
         int pass2Reduces = HalvadeResourceManager.getPass2Reduces(halvadeOpts);
         halvadeOpts.splitChromosomes(pass1Conf, pass2Reduces);
         HalvadeConf.setPass2Suffix(pass1Conf, pass2suffix);

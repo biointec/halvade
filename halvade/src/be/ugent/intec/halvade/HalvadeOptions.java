@@ -71,6 +71,7 @@ public class HalvadeOptions {
         be.ugent.intec.halvade.hadoop.mapreduce.Bowtie2Mapper.class,
         be.ugent.intec.halvade.hadoop.mapreduce.Cushaw2Mapper.class
     };
+    public boolean runsOnS3 = false;
     public boolean justCombine = false;
     public boolean filterDBSnp = false;
     public boolean useGenotyper = true;
@@ -136,7 +137,7 @@ public class HalvadeOptions {
             }
             onedec = new DecimalFormat("###0.0");
             // add parameters to configuration:
-            HalvadeConf.setRefDirIsSet(hConf, (localRefDir != null || nodes > 1)); // true -> requires upload!
+            HalvadeConf.setRequireRefUpload(hConf, (localRefDir == null && nodes > 1));
             if(rnaPipeline) 
                 Logger.DEBUG("requires star genome 2 upload? " + (localRefDir != null || nodes > 1));
             if (localRefDir == null) {
@@ -623,6 +624,8 @@ public class HalvadeOptions {
         CommandLine line = parser.parse(options, args);
 
         in = line.getOptionValue("I");
+        if(in.startsWith("s3")) 
+            runsOnS3 = true;
         out = line.getOptionValue("O");
         if (!out.endsWith("/")) {
             out += "/";

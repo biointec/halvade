@@ -108,11 +108,11 @@ public class HalvadeResourceManager {
   
         conf.set("mapreduce.reduce.cpu.vcores", "" + opt.rthreads );
         conf.set("mapreduce.reduce.memory.mb", "" + rmem);        
-        conf.set("mapreduce.reduce.java.opts", "-Xmx" + (int)(0.20*rmem) + "m"); // warning this is a test!! it will use too much memory if the memory check isnt disabled!!
-        conf.set("mapreduce.map.java.opts", "-Xmx" + (int)(0.20*mmem) + "m");
+        conf.set("mapreduce.reduce.java.opts", "-Xmx" + (int)(0.4*rmem) + "m"); // warning this is a test!! it will use too much memory if the memory check isnt disabled!!
+        conf.set("mapreduce.map.java.opts", "-Xmx" + (int)(0.4*mmem) + "m");
         if(type == COMBINE) {
-            conf.set("mapreduce.reduce.java.opts", "-Xmx" + (int)(0.80*rmem) + "m");
-            conf.set("mapreduce.map.java.opts", "-Xmx" + (int)(0.80*mmem) + "m");
+            conf.set("mapreduce.reduce.java.opts", "-Xmx" + (int)(0.8*rmem) + "m");
+            conf.set("mapreduce.map.java.opts", "-Xmx" + (int)(0.8*mmem) + "m");
         }
         if(type != COMBINE)
             conf.set("mapreduce.job.reduce.slowstart.completedmaps", "0.99");

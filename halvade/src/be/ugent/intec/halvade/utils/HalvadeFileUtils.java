@@ -445,7 +445,7 @@ public class HalvadeFileUtils {
         Configuration conf = context.getConfiguration();
         String tmpDir = HalvadeConf.getScratchTempDir(conf);
         String refDir = HalvadeConf.getRefDirOnScratch(conf);
-        boolean requireUploadToHDFS = !HalvadeConf.getRefDirIsSet(context.getConfiguration());
+        boolean requireUploadToHDFS = HalvadeConf.getRequireRefUpload(context.getConfiguration());
         if(!refDir.endsWith("/")) refDir = refDir + "/";
         HalvadeFileLock lock = new HalvadeFileLock(context, tmpDir, usePass2Genome ? STARG2_LOCK : STARG_LOCK );
         String Halvade_Star_Suffix_P2 = HalvadeConf.getPass2Suffix(context.getConfiguration());
@@ -685,9 +685,9 @@ public class HalvadeFileUtils {
     public static boolean removeLocalDir(boolean keep, String filename) {
         if(keep) return false;
         File f = new File(filename);
-        long size = getFolderSize(f);
+//        long size = getFolderSize(f);
         boolean res = f.exists() && deleteDir(f);
-        Logger.DEBUG((res ? "successfully deleted ": "failed to delete ") + "\"" + filename + "\" [" + (size / 1024 / 1024)+ "Mb]");
+        Logger.DEBUG((res ? "successfully deleted ": "failed to delete ") + "\"" + filename + "\""); // [" + (size / 1024 / 1024)+ "Mb]");
         return res; 
     }
     public static  boolean removeLocalDir(String filename, TaskInputOutputContext context, HalvadeCounters counter) {
@@ -697,9 +697,9 @@ public class HalvadeFileUtils {
         if(keep) return false;
         File f = new File(filename);
         if(f.exists()) context.getCounter(counter).increment(f.length());
-        long size = getFolderSize(f);
+//        long size = getFolderSize(f);
         boolean res = f.exists() && deleteDir(f);
-        Logger.DEBUG((res ? "successfully deleted ": "failed to delete ") + "\"" + filename + "\" [" + (size / 1024 / 1024)+ "Mb]");
+        Logger.DEBUG((res ? "successfully deleted ": "failed to delete ") + "\"" + filename + "\"");// [" + (size / 1024 / 1024)+ "Mb]");
         return res; 
     } 
     	
@@ -709,13 +709,18 @@ public class HalvadeFileUtils {
     }
     protected static long getFolderSize(File dir) {
         long size = 0;
-        for (File file : dir.listFiles()) {
-            if (file.isFile()) {
-                System.out.println(file.getName() + " " + file.length());
-                size += file.length();
+        if(!dir.isDirectory()) 
+            size = dir.length();
+        else {
+            File[] list = dir.listFiles();
+            if(list == null) return 0;
+            for (File file : list) {
+                if (file.isFile()) {
+                    System.out.println(file.getName() + " " + file.length());
+                    size += file.length();
+                } else
+                    size += getFolderSize(file);
             }
-            else
-                size += getFolderSize(file);
         }
         return size;
     }
