@@ -89,8 +89,11 @@ To use Halvade on Amazon EMR an AMI version of 3.1.0 or newer should be used. Ad
 	emr_type="c3.8xlarge"
 	emr_ami_v="3.1.0"
 	tmp="/mnt/halvade/"
+	emr_s3logging="s3://halv_bucket/user/ddecap/halvade/logs/"
 
 The ``tmp`` option is updated to point to the local SSD's on the Amazon EMR nodes, which are mounted in the ``/mnt/`` folder.
+The ``emr_s3logging`` argument is used to save all Hadoop master and task logs for debugging purposes. 
+
 
 Additionally to run the script the default EMR need to be created in order to work, run this command:
 

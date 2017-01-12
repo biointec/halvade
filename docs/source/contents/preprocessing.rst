@@ -19,9 +19,16 @@ Synopsis
 .. code-block:: bash
 	:linenos:
 
-	Hadoop jar HalvadeUploaderWithLibs.jar –1 /dir/to/input.manifest -O /halvade/out/ –t 8
-	Hadoop jar HalvadeUploaderWithLibs.jar –1 /dir/to/reads1.fastq -2 /dir/to/reads2.fastq -O /halvade/out/ –t 8
-	Hadoop jar HalvadeUploaderWithLibs.jar –1 /dir/to/input.manifest -O s3://bucketname/halvade/out/ -profile /dir/to/credentials.txt –t 8
+	hadoop jar HalvadeUploaderWithLibs.jar –1 /dir/to/input.manifest -O /halvade/out/ –t 8
+	hadoop jar HalvadeUploaderWithLibs.jar –1 /dir/to/reads1.fastq -2 /dir/to/reads2.fastq -O /halvade/out/ –t 8
+	hadoop jar HalvadeUploaderWithLibs.jar –1 /dir/to/input.manifest -O s3://bucketname/halvade/out/ -profile /dir/to/credentials.txt –t 8
+
+The manifest file if used, contains per line a pair of files (reads1 and reads2) separated by a tab: 
+
+.. code-block:: bash
+	:linenos:
+	/path/to/file1_reads1.fq.gz	/path/to/file1_reads2.fq.gz
+	/path/to/file2_reads1.fq.gz	/path/to/file2_reads2.fq.gz
 
 
 Required options

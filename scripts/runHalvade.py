@@ -77,7 +77,11 @@ print jar
 # determine if S3 is used -> use amazon EMR
 if "emr_type" in emr_config:
 	print "Running Halvade on Amazon EMR:"
-	emr_mem = int(config["mem"])*1024
+	emr_mem = 0
+	if "mem" in config:
+		emr_mem = int(config["mem"])*1024
+	else:
+		emr_mem = int(config["M"])*1024
 	timeout = 10800000 #3h
 	hadoopArgs="[-y,yarn.scheduler.maximum-allocation-mb=%d,-y,yarn.nodemanager.resource.memory-mb=%d,-m,mapreduce.job.reduce.slowstart.completedmaps=1.0,-m,mapreduce.task.timeout=%d]" %(emr_mem, emr_mem,timeout)
 	print hadoopArgs
