@@ -21,7 +21,7 @@ Required options
 				be located in a different folder.
 -M, --mem <INT>		Memory size. This gives the total memory each node in the cluster has. The memory size is given in GB.
 -N, --nodes INT		Node count. This gives the total number of nodes in the local cluster or the number of nodes you want to request when using Amazon EMR. Amazon AWS has a limit of 20 nodes unless the nodes are reserved for an extended period of time.
--C, --vcores INT	Vcores count. This gives the number of cores that can be used per node on the cluster (to enable simultaneous multithreading use the *--smt* option).
+-C, --vcores INT	Vcores count. This gives the number of cores that can be used per node on the cluster (to enable simultaneous multithreading use the ``--smt`` option).
 
 Optional options
 ----------------
