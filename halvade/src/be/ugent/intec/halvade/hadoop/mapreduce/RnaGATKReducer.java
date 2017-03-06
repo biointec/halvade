@@ -35,7 +35,7 @@ public class RnaGATKReducer extends GATKReducer {
         String tmpFile1 = tmpFileBase + "-2.bam";
         String tmpFile2 = tmpFileBase + "-3.bam";
         String tmpFile3 = tmpFileBase + "-4.bam";
-        String snps = tmpFileBase + ".vcf";
+        String snps = tmpFileBase + (outputGVCF ? ".g.vcf" : ".vcf");
         String filteredSnps = tmpFileBase + "-filtered.vcf";    
         String annotatedSnps = tmpFileBase + "-annotated.vcf";
         

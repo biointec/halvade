@@ -46,6 +46,7 @@ public abstract class GATKReducer extends HalvadeReducer {
     protected boolean fixQualEnc;
     protected boolean filterDBsnp;
     protected boolean useUnifiedGenotyper;
+    protected boolean outputGVCF;
     protected double sec, scc;
     protected String filterBedFile;
     protected int newMaxQualScore = 60;
@@ -102,6 +103,7 @@ public abstract class GATKReducer extends HalvadeReducer {
         useUnifiedGenotyper = HalvadeConf.getUseUnifiedGenotyper(context.getConfiguration());
         redistribute = HalvadeConf.getRedistribute(context.getConfiguration());
         containers = HalvadeConf.getMapContainerCount(context.getConfiguration());
+        outputGVCF = HalvadeConf.getOutputGVCF(context.getConfiguration());
         tasksLeft = Integer.parseInt(context.getConfiguration().get("mapred.map.tasks")) - taskNr;
         // get task number: 
         if (redistribute && tasksLeft < containers) {
@@ -327,7 +329,7 @@ public abstract class GATKReducer extends HalvadeReducer {
         if (useUnifiedGenotyper) {
             gatk.runUnifiedGenotyper(input, output, scc, sec, ref, null, region);
         } else {
-            gatk.runHaplotypeCaller(input, output, false, scc, sec, ref, null, region);
+            gatk.runHaplotypeCaller(input, output, false, scc, sec, ref, null, region, outputGVCF);
         }
 
         context.setStatus("cleanup");
@@ -342,7 +344,7 @@ public abstract class GATKReducer extends HalvadeReducer {
         Logger.DEBUG("run variantCaller");
         context.setStatus("run variantCaller");
         context.getCounter(HalvadeCounters.TOOLS_GATK).increment(1);
-        gatk.runHaplotypeCaller(input, output, true, scc, sec, ref, null, region);
+        gatk.runHaplotypeCaller(input, output, true, scc, sec, ref, null, region, outputGVCF);
 
         context.setStatus("cleanup");
         context.getCounter(HalvadeCounters.OUT_VCF_FILES).increment(1);

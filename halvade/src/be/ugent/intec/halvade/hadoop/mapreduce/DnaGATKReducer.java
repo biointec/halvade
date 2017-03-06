@@ -32,7 +32,7 @@ public class DnaGATKReducer extends GATKReducer {
         String preprocess = tmpFileBase + ".bam";
         String tmpFile1 = tmpFileBase + "-2.bam";
         String tmpFile2 = tmpFileBase + "-3.bam";
-        String snps = tmpFileBase + ".vcf";    
+        String snps = tmpFileBase + (outputGVCF ? ".g.vcf" : ".vcf");    
         boolean useElPrep = HalvadeConf.getUseElPrep(context.getConfiguration());
         boolean splitNtrim = HalvadeConf.getSplitNTrim(context.getConfiguration());
         ChromosomeRange r = new ChromosomeRange();

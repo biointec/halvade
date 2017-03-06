@@ -40,6 +40,7 @@ public class BamMergeReducer extends Reducer<ChromosomeRegion, SAMRecordWritable
     protected String RGSM = "SAMPLE1";  
     protected SAMReadGroupRecord bamrg;
     protected boolean inputIsBam = false;
+    protected boolean updateRG = false;
     protected RecordWriter<LongWritable,SAMRecordWritable> recordWriter;
     protected SAMRecordWritable samWritable = new SAMRecordWritable();
     protected LongWritable outKey;
@@ -50,8 +51,9 @@ public class BamMergeReducer extends Reducer<ChromosomeRegion, SAMRecordWritable
         outpFormat = new KeyIgnoringBAMOutputFormat();
         String output = HalvadeConf.getOutDir(context.getConfiguration());
         inputIsBam = HalvadeConf.inputIsBam(context.getConfiguration());
+        updateRG = HalvadeConf.getUpdateReadGroup(context.getConfiguration());
         dict = HalvadeConf.getSequenceDictionary(context.getConfiguration());
-        if(inputIsBam) {
+        if(inputIsBam && !updateRG) {
             header = SAMHeaderReader.readSAMHeaderFrom(new Path(HalvadeConf.getHeaderFile(context.getConfiguration())), context.getConfiguration());
         } else {
             getReadGroupData(context.getConfiguration());
@@ -77,7 +79,9 @@ public class BamMergeReducer extends Reducer<ChromosomeRegion, SAMRecordWritable
         SAMRecord sam = null;
         while(it.hasNext()) {
             sam = it.next().get();
-            sam.setAttribute(SAMTag.RG.name(), RGID);
+            if(!inputIsBam  || updateRG) {
+                sam.setAttribute(SAMTag.RG.name(), RGID);
+            }
             samWritable.set(sam);
             recordWriter.write(outKey, samWritable);
                     

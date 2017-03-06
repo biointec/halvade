@@ -24,7 +24,6 @@ import java.util.Arrays;
 import be.ugent.intec.halvade.utils.ProcessBuilderWrapper;
 import be.ugent.intec.halvade.utils.Logger;
 import be.ugent.intec.halvade.utils.HalvadeConf;
-import be.ugent.intec.halvade.utils.HalvadeFileUtils;
 import java.text.DecimalFormat;
 import java.util.Collections;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -420,7 +419,7 @@ public class GATKTools {
     }
 
     public void runHaplotypeCaller(String input, String output, boolean disableSoftClipping, 
-            double scc, double sec, String ref, String[] knownSites, String region) throws InterruptedException {
+            double scc, double sec, String ref, String[] knownSites, String region, boolean outputGVCF) throws InterruptedException {
         /**
          * example:
          * -I recalibrated.bam -T UnifiedGenotyper -o output.vcf -R ref
@@ -443,6 +442,10 @@ public class GATKTools {
         command.addAll(Arrays.asList(gatkcmd));
         if(disableSoftClipping) {
             command.add("-dontUseSoftClippedBases");
+        }
+        if(outputGVCF) {
+            command.add("-ERC");
+            command.add("GVCF");
         }
         if(knownSites != null) {
             for(String knownSite : knownSites) {

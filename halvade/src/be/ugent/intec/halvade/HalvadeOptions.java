@@ -118,6 +118,7 @@ public class HalvadeOptions {
     public boolean fixQualEnc = false;
     public String stargtf = null;
     public boolean skipBQSR = false;
+    public boolean outputGVCF = false;
 
     protected DecimalFormat onedec;
     protected static final double REDUCE_TASKS_FACTOR = 1.68 * 15;
@@ -175,6 +176,7 @@ public class HalvadeOptions {
             HalvadeConf.setKeepDups(hConf, keepDups);
             HalvadeConf.setSplitNTrim(hConf, splitntrim);
             HalvadeConf.setRedistribute(hConf, redistribute);
+            HalvadeConf.setOutputGVCF(hConf, outputGVCF);
             HalvadeConf.setReadGroup(hConf, "ID:" + RGID + " LB:" + RGLB + " PL:" + RGPL + " PU:" + RGPU + " SM:" + RGSM);
             HalvadeConf.setkeepChrSplitPairs(hConf, keepChrSplitPairs);
             if (STARGenome != null) {
@@ -559,6 +561,9 @@ public class HalvadeOptions {
         Option optSkipBQSR = OptionBuilder.withDescription("Skip the BQSR step if no dbSNP is available.")
                 .withLongOpt("skip_bqsr")
                 .create();
+        Option optOutGVCF = OptionBuilder.withDescription("Gives the GVCF as output instead of the regular VCF file. Requires the `haplotypecaller` option.")
+                .withLongOpt("gvcf")
+                .create();
 
         options.addOption(optIn);
         options.addOption(optOut);
@@ -616,6 +621,7 @@ public class HalvadeOptions {
         options.addOption(optSnappy);
         options.addOption(optSplitNTrim);
         options.addOption(optSkipBQSR);
+        options.addOption(optOutGVCF);
     }
 
     protected boolean parseArguments(String[] args, Configuration halvadeConf) throws ParseException {
@@ -653,7 +659,7 @@ public class HalvadeOptions {
                 STARGenome = line.getOptionValue("star");
             }
             if (!useBamInput && STARGenome == null) {
-                throw new ParseException("the '-rna' option requires --star pointing to the location of the STAR reference directory if alignment with STAR aligner is required (fastq).");
+                throw new ParseException("The '--rna' option requires --star pointing to the location of the STAR reference directory if alignment with STAR aligner is required (fastq).");
             }
         }
 
@@ -773,8 +779,16 @@ public class HalvadeOptions {
         if (line.hasOption("reorder_regions")) {
             reorderRegions = true;
         }
+        
         if (line.hasOption("haplotypecaller")) {
             useGenotyper = false;
+        }
+        if (line.hasOption("gvcf")) {
+            if(!useGenotyper) {
+                outputGVCF = true;
+            } else {
+                throw new ParseException("The '--gvcf' option requires --haplotypecaller as UnifiedGenotyper doesn't support this output format.");
+            }
         }
         if (line.hasOption("elprep")) {
             useElPrep = true;

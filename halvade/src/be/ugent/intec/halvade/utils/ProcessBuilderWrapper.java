@@ -19,6 +19,7 @@ package be.ugent.intec.halvade.utils;
 
 import be.ugent.intec.halvade.tools.ProcessException;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -62,6 +63,25 @@ public class ProcessBuilderWrapper {
     public ProcessBuilderWrapper(String[] command, String libdir) {
         this.command = command;
         this.libdir = libdir;
+    }
+    
+    public static void whoAmI() throws InterruptedException {
+        try {      
+            ArrayList<String> tmp = new ArrayList<>();   
+            tmp.add("whoami");
+            Object[] ObjectList = tmp.toArray();
+            String[] WhoAmICommand =  Arrays.copyOf(ObjectList,ObjectList.length,String[].class);
+            ProcessBuilder builder = new ProcessBuilder(WhoAmICommand);
+            Process whoami = builder.start();
+            StreamGobbler out = new StreamGobbler(whoami.getInputStream(), System.out);
+            out.start();
+            StreamGobbler err = new StreamGobbler(whoami.getErrorStream(), System.err);
+            err.start();
+        } catch (IOException ex) {
+            Logger.EXCEPTION(ex);
+            throw new ProcessException(ex.getMessage(), -1);
+        }  
+        
     }
     
     public void setThreads(int threads) {

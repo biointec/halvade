@@ -244,7 +244,7 @@ public class HalvadeConf {
             } else {
                 FileStatus[] files = fs.listStatus(new Path(val[i]));
                 for(FileStatus file : files) {
-                    if (!file.isDir()) {
+                    if (!file.isDirectory()) {
                         conf.set(sitesOnHDFSName + i, file.getPath().toString());
                     }
                 }
@@ -623,6 +623,15 @@ public class HalvadeConf {
     
     public static boolean getSkipBQSR(Configuration conf) {
         return conf.getBoolean(skipBQSR, false);
+    }
+
+    private static final String outputGVCF= "outputGVCF";
+    public static void setOutputGVCF(Configuration conf, boolean val) {
+        conf.setBoolean(outputGVCF, val);
+    }
+    
+    public static boolean getOutputGVCF(Configuration conf) {
+        return conf.getBoolean(outputGVCF, false);
     }
 
 }
