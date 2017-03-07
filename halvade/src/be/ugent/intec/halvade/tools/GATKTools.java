@@ -434,8 +434,6 @@ public class GATKTools {
             "-R", ref,
             "-I", input,
             "-o", output,
-            "-stand_call_conf", roundOneDecimal(scc),
-            "-stand_emit_conf", roundOneDecimal(sec),
             "-L", region,
             NO_CMD_HEADER,
             DISABLE_VCF_LOCKING};
@@ -446,6 +444,11 @@ public class GATKTools {
         if(outputGVCF) {
             command.add("-ERC");
             command.add("GVCF");
+        } else { // this is only used when not in gvcf mode
+            command.add("-stand_call_conf");
+            command.add(roundOneDecimal(scc));
+//            command.add("-stand_emit_conf"); // deprecated!
+//            command.add(roundOneDecimal(sec)); // deprecated!
         }
         if(knownSites != null) {
             for(String knownSite : knownSites) {
