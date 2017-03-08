@@ -98,7 +98,9 @@ public class VCFCombineReducer extends Reducer<LongWritable, VariantContextWrita
             }
             Logger.DEBUG("first file: " + firstVcfFile);
             outpFormat.readHeaderFrom(firstVcfFile, fs);
-            recordWriter = outpFormat.getRecordWriter(context, new Path(output + "HalvadeCombined.vcf"));
+            
+            boolean outputGVCF = HalvadeConf.getOutputGVCF(context.getConfiguration());
+            recordWriter = outpFormat.getRecordWriter(context, new Path(output + (outputGVCF ? "HalvadeCombined.g.vcf" : "HalvadeCombined.vcf")));
         } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);
             throw new InterruptedException("URI for input directory is invalid.");
