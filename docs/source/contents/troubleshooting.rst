@@ -7,6 +7,10 @@ Find the logs to solve Halvade errors
 If Halvade doesn't finish due to an error, the error itself is printed in the output of the Hadoop command. However, more information can be found in the individual task stderr logs of the MapReduce job. The location of these log files is set in the MapReduce settings. Typically these are stored at `${yarn.log.dir}/userlogs` or if the `YARN_LOG_DIR` environment is set under `$YARN_LOG_DIR/userlogs`. It's highly likely that all reduce tasks give a similar result, so look at the stderr log of any reduce task. 
 This log will show where Halvade is running into problems. If it isn't clear from the log, try to run the last command, with the error, manually. The exact command should be printed in the log as an array of strings, run this command with the shown option.
 
+Halvade having a reference file error while downloading/loading
+---------------------------------------------------------------
+
+It is possible that Halvade isn't downloading the files correctly after a Halvade job has been terminated before it has finished. The reference files are downloaded to a single node by using a locking file system. A value of one is written to the locked file if the reference file has been downloaded and zero otherwise. If this occurs it is best to delete the tmp folder or these locked files (filez of only a few bytes in size) so that Halvade can go through the downloading process correctly.
 
 Halvade with BAM input seems stuck at the MarkDuplicates step
 -------------------------------------------------------------
@@ -19,3 +23,4 @@ If the stderr log of a reduce task shows it started the MarkDuplicates file but 
 	java -jar picard.jar ReorderSam I=input.bam O=output.bam R=reference.fasta
 
 Use the new file as input and Halvade should run without any problems now.
+
