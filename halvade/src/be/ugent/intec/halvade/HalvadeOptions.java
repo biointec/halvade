@@ -64,7 +64,7 @@ public class HalvadeOptions {
     public int maps = 1, reduces = 1, parallel_reducers = 1, mthreads = 1, rthreads = 1;
     public String[] hdfsSites;
     public boolean paired = true;
-    public int aln = 0;
+    public int aln = 1;
     public Class<? extends Mapper>[] alignmentTools = new Class[]{
         be.ugent.intec.halvade.hadoop.mapreduce.BWAAlnMapper.class,
         be.ugent.intec.halvade.hadoop.mapreduce.BWAMemMapper.class,
@@ -481,7 +481,7 @@ public class HalvadeOptions {
                 .create("v");
         Option optAln = OptionBuilder.withArgName("num")
                 .hasArg()
-                .withDescription("Sets the aligner used in Halvade. Possible values are 0 (bwa aln+sampe)[default], 1 (bwa mem), 2 (bowtie2), 3 (cushaw2).")
+                .withDescription("Sets the aligner used in Halvade. Possible values are 0 (bwa aln+sampe), 1 (bwa mem)[default], 2 (bowtie2), 3 (cushaw2).")
                 .withLongOpt("aln")
                 .create();
         Option optReadsPerRegion = OptionBuilder.withArgName("file")
@@ -756,7 +756,7 @@ public class HalvadeOptions {
         if (line.hasOption("aln")) {
             aln = Integer.parseInt(line.getOptionValue("aln"));
             if (aln < 0 || aln > 3) {
-                aln = 0; // default value
+                aln = 1; // default value
             }
         }
         if (line.hasOption("J")) {
