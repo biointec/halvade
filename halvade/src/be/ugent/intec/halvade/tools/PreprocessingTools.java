@@ -258,12 +258,13 @@ public class PreprocessingTools {
         return estimatedTime;
     }
     
-    String[] PicardTools = {
-        "BuildBamIndex.jar", 
-        "AddOrReplaceReadGroups.jar",
-        "MarkDuplicates.jar",
-        "CleanSam.jar",
-        "picard.jar"
+    String picard = "picard.jar";
+    String [] PicardTools = {
+        "BuildBamIndex", 
+        "AddOrReplaceReadGroups",
+        "MarkDuplicates",
+        "CleanSam",
+        "SortVcf"
     };
     
     private static String[] GetStringVector(Collection<String> c) {
@@ -274,15 +275,16 @@ public class PreprocessingTools {
     public int runBuildBamIndex(String input) throws InterruptedException {
         String tool;
         if(bin.endsWith("/")) 
-            tool = bin + PicardTools[0];
+            tool = bin + picard;
         else
-            tool = bin + "/" + PicardTools[0];     
+            tool = bin + "/" + picard;     
               
         ArrayList<String> command = new ArrayList<>();
         command.addAll(java);
         command.add(mem);
         command.add("-jar");
         command.add(tool);
+        command.add(PicardTools[0]);
         command.add("INPUT=" + input);
         String customArgs = HalvadeConf.getCustomArgs(context.getConfiguration(), "picard", "buildbamindex");  
         command = CommandGenerator.addToCommand(command, customArgs);        
@@ -296,14 +298,15 @@ public class PreprocessingTools {
             String RGPU, String RGSM) throws InterruptedException {
         String tool;
         if(bin.endsWith("/")) 
-            tool = bin + PicardTools[1];
+            tool = bin + picard;
         else
-            tool = bin + "/" + PicardTools[1];      
+            tool = bin + "/" + picard;     
         ArrayList<String> command = new ArrayList<>();
         command.addAll(java);
         command.add(mem);
         command.add("-jar");
         command.add(tool);
+        command.add(PicardTools[1]);
         command.add("INPUT=" + input);
         command.add("OUTPUT=" + output);
         command.add("RGID=" + RGID);
@@ -322,15 +325,15 @@ public class PreprocessingTools {
     public int runSortVcf(String input, String output) throws InterruptedException {
         String tool;
         if(bin.endsWith("/")) 
-            tool = bin + PicardTools[4];
+            tool = bin + picard;
         else
-            tool = bin + "/" + PicardTools[4];  
+            tool = bin + "/" + picard;  
         ArrayList<String> command = new ArrayList<>();
         command.addAll(java);
         command.add(mem);
         command.add("-jar");
         command.add(tool);
-        command.add("SortVcf");
+        command.add(PicardTools[4]);
         command.add("I=" + input);
         command.add("O=" + output);                     
         String customArgs = HalvadeConf.getCustomArgs(context.getConfiguration(), "picard", "sortvcf");  
@@ -343,14 +346,15 @@ public class PreprocessingTools {
     public int runMarkDuplicates(String input, String output, String metrics, boolean keepDups) throws InterruptedException {
         String tool;
         if(bin.endsWith("/")) 
-            tool = bin + PicardTools[2];
+            tool = bin + picard;
         else
-            tool = bin + "/" + PicardTools[2];  
+            tool = bin + "/" + picard;  
         ArrayList<String> command = new ArrayList<>();
         command.addAll(java);
         command.add(mem);
         command.add("-jar");
         command.add(tool);
+        command.add(PicardTools[2]);
         command.add("INPUT=" + input);
         command.add("OUTPUT=" + output);
         command.add("METRICS_FILE=" + metrics);
@@ -368,14 +372,15 @@ public class PreprocessingTools {
     public int runCleanSam(String input, String output) throws InterruptedException {
         String tool;
         if(bin.endsWith("/")) 
-            tool = bin + PicardTools[3];
+            tool = bin + picard;
         else
-            tool = bin + "/" + PicardTools[3];   
+            tool = bin + "/" + picard;  
         ArrayList<String> command = new ArrayList<>();
         command.addAll(java);
         command.add(mem);
         command.add("-jar");
         command.add(tool);
+        command.add(PicardTools[3]);
         command.add("INPUT=" + input);
         command.add("OUTPUT=" + output);                   
         String customArgs = HalvadeConf.getCustomArgs(context.getConfiguration(), "picard", "cleansam");  
