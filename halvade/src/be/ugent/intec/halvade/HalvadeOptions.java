@@ -74,7 +74,7 @@ public class HalvadeOptions {
     public boolean runsOnS3 = false;
     public boolean justCombine = false;
     public boolean filterDBSnp = false;
-    public boolean useGenotyper = true;
+    public boolean useGenotyper = false;
     public String RGID = "GROUP1";
     public String RGLB = "LIB1";
     public String RGPL = "ILLUMINA";
@@ -84,6 +84,7 @@ public class HalvadeOptions {
     public boolean keepFiles = false;
     public boolean keepBamFiles = false;
     public boolean splitntrim = false;
+    public boolean doIndelRealignment = false;
     public int stand_call_conf = -1;
     public int stand_emit_conf = -1;
     public SAMSequenceDictionary dict;
@@ -176,6 +177,7 @@ public class HalvadeOptions {
             HalvadeConf.setKeepDups(hConf, keepDups);
             HalvadeConf.setSplitNTrim(hConf, splitntrim);
             HalvadeConf.setRedistribute(hConf, redistribute);
+            HalvadeConf.setDoIndelRealignment(hConf, doIndelRealignment);
             HalvadeConf.setOutputGVCF(hConf, outputGVCF);
             HalvadeConf.setReadGroup(hConf, "ID:" + RGID + " LB:" + RGLB + " PL:" + RGPL + " PU:" + RGPU + " SM:" + RGSM);
             HalvadeConf.setkeepChrSplitPairs(hConf, keepChrSplitPairs);
@@ -516,10 +518,10 @@ public class HalvadeOptions {
         Option optKeepBam = OptionBuilder.withDescription("Keep final Bam files.")
                 .withLongOpt("keepbam")
                 .create();
-        Option optHap = OptionBuilder.withDescription("Use HaplotypeCaller instead of UnifiedGenotyper for Variant Detection.")
-                .withLongOpt("haplotypecaller")
-                .create("H");
-        Option optRna = OptionBuilder.withDescription("Run the RNA Best Practices pipeline by Broad [default is DNA pipeline]. SG needs to be set for this.")
+        Option optHap = OptionBuilder.withDescription("Use UnifiedGenotyper instead of HaplotypeCaller for Variant Detection.")
+                .withLongOpt("unifiedgenotyper")
+                .create("U");
+        Option optRna = OptionBuilder.withDescription("Run the RNA Best Practices pipeline by Broad [default is DNA pipeline]. The S option needs to be set for this.")
                 .withLongOpt("rna")
                 .create();
         Option optDry = OptionBuilder.withDescription("Execute a dryrun, will calculate task size, split for regions etc, but not execute the MapReduce job.")
@@ -561,8 +563,11 @@ public class HalvadeOptions {
         Option optSkipBQSR = OptionBuilder.withDescription("Skip the BQSR step if no dbSNP is available.")
                 .withLongOpt("skip_bqsr")
                 .create();
-        Option optOutGVCF = OptionBuilder.withDescription("Gives the GVCF as output instead of the regular VCF file. Requires the `haplotypecaller` option.")
+        Option optOutGVCF = OptionBuilder.withDescription("Gives the GVCF as output instead of the regular VCF file. Can't be used with the `unifiedgenotyper` option.")
                 .withLongOpt("gvcf")
+                .create();
+        Option optIndelRealn = OptionBuilder.withDescription("Run the Indel Realignment step before the BQSR or Variant calling step.")
+                .withLongOpt("indelrealignment")
                 .create();
 
         options.addOption(optIn);
@@ -622,6 +627,7 @@ public class HalvadeOptions {
         options.addOption(optSplitNTrim);
         options.addOption(optSkipBQSR);
         options.addOption(optOutGVCF);
+        options.addOption(optIndelRealn);
     }
 
     protected boolean parseArguments(String[] args, Configuration halvadeConf) throws ParseException {
@@ -692,6 +698,9 @@ public class HalvadeOptions {
         }
         if (line.hasOption("rpr")) {
             readCountsPerRegionFile = line.getOptionValue("rpr");
+        }
+        if (line.hasOption("indelrealignment")) {
+            doIndelRealignment = true;
         }
         if (line.hasOption("mpn")) {
             setMapContainers = false;
@@ -780,14 +789,14 @@ public class HalvadeOptions {
             reorderRegions = true;
         }
         
-        if (line.hasOption("haplotypecaller")) {
-            useGenotyper = false;
+        if (line.hasOption("unifiedgenotyper")) {
+            useGenotyper = true;
         }
         if (line.hasOption("gvcf")) {
             if(!useGenotyper) {
                 outputGVCF = true;
             } else {
-                throw new ParseException("The '--gvcf' option requires --haplotypecaller as UnifiedGenotyper doesn't support this output format.");
+                throw new ParseException("The '--gvcf' option can't be used together with the --unifiedgenotyper option as the UnifiedGenotyper doesn't support this output format.");
             }
         }
         if (line.hasOption("elprep")) {

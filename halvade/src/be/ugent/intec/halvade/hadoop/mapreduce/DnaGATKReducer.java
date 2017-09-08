@@ -53,19 +53,24 @@ public class DnaGATKReducer extends GATKReducer {
         region = makeRegionFile(context, r, tools, region);
         if(region == null) return;
         
+        
+        String indelRealnInput = preprocess;
         // do splitntrim if option
         if(splitNtrim) {
             String tmpFile0 = tmpFileBase + "-1.bam";
             splitNTrim(context, region, gatk, preprocess, tmpFile0, false);
-            indelRealignment(context, region, gatk, tmpFile0, tmpFile1);  
-        } else {
-            indelRealignment(context, region, gatk, preprocess, tmpFile1);  
-        }      
+            indelRealnInput = tmpFile0;
+        }    
+        String varCalInput = indelRealnInput;
+        if (doIndelRealignment) {
+            indelRealignment(context, region, gatk, indelRealnInput, tmpFile1);  
+            varCalInput = tmpFile1;
+        }
         
         if(skipBQSR) {
-            DnaVariantCalling(context, region, gatk, tmpFile1, snps);  
+            DnaVariantCalling(context, region, gatk, varCalInput, snps);  
         } else {            
-            baseQualityScoreRecalibration(context, region, r, tools, gatk, tmpFile1, tmpFile2);        
+            baseQualityScoreRecalibration(context, region, r, tools, gatk, varCalInput, tmpFile2);        
             DnaVariantCalling(context, region, gatk, tmpFile2, snps);
         }
         variantFiles.add(snps);

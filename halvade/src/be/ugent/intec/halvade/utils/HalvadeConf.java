@@ -113,6 +113,15 @@ public class HalvadeConf {
             return false;
     }
     
+    private static final String doIndelRealn = "doindelrealingment";
+    public static void setDoIndelRealignment(Configuration conf, boolean val) {
+        conf.setBoolean(doIndelRealn, val);
+    }
+    public static boolean getDoIndelRealignment(Configuration conf) {
+        return conf.getBoolean(doIndelRealn, false);
+    }
+          
+    
     private static final String redist = "redistribute";
     public static void setRedistribute(Configuration conf, boolean val) {
         if(val)

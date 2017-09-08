@@ -46,6 +46,7 @@ public abstract class GATKReducer extends HalvadeReducer {
     protected boolean fixQualEnc;
     protected boolean filterDBsnp;
     protected boolean useUnifiedGenotyper;
+    protected boolean doIndelRealignment;
     protected boolean outputGVCF;
     protected double sec, scc;
     protected String filterBedFile;
@@ -103,6 +104,7 @@ public abstract class GATKReducer extends HalvadeReducer {
         useUnifiedGenotyper = HalvadeConf.getUseUnifiedGenotyper(context.getConfiguration());
         redistribute = HalvadeConf.getRedistribute(context.getConfiguration());
         containers = HalvadeConf.getMapContainerCount(context.getConfiguration());
+        doIndelRealignment = HalvadeConf.getDoIndelRealignment(context.getConfiguration());
         outputGVCF = HalvadeConf.getOutputGVCF(context.getConfiguration());
         tasksLeft = Integer.parseInt(context.getConfiguration().get("mapred.map.tasks")) - taskNr;
         // get task number: 
