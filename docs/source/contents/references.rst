@@ -41,6 +41,20 @@ The BWA aligner is used for the whole genome and exome sequencing pipelines. A B
 
 This process will create 5 files with the provided name as a prefix, this naming convention is important as Halvade finds this index by the FASTA prefix ``ucsc.hg19``. 
 
+The reference folder should contain these files:
+
+- /home/user/halvade/ref/ucsc.hg19.fasta
+- /home/user/halvade/ref/ucsc.hg19.fasta.fai
+- /home/user/halvade/ref/ucsc.hg19.dict
+- /home/user/halvade/ref/ucsc.hg19.fasta.amb
+- /home/user/halvade/ref/ucsc.hg19.fasta.ann
+- /home/user/halvade/ref/ucsc.hg19.fasta.bwt
+- /home/user/halvade/ref/ucsc.hg19.fasta.pac
+- /home/user/halvade/ref/ucsc.hg19.fasta.sa
+- /home/user/halvade/ref/dbsnp/dbsnp_138.hg19.vcf
+- /home/user/halvade/ref/dbsnp/dbsnp_138.hg19.vcf.idx
+
+
 STAR reference for RNA-seq data
 -------------------------------
 

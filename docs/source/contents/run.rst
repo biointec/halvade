@@ -36,6 +36,8 @@ The ``example.config`` file contains the most basic example, in which the necess
 	I="/user/ddecap/halvade/in/"
 	O="/user/ddecap/halvade/out/"
 
+Note that the input folder is the output of the preprocessing step with HalvadeUploader.
+
 To run the RNA-seq pipeline two additional options need to be provided:
 
 .. code-block:: bash

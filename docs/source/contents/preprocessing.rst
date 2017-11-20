@@ -1,7 +1,7 @@
 Halvade Preprocessing
 ========================
 
-The Halvade Uploader will preprocesses the FASTQ files, this will interleave the paired-end reads and split the files in pieces of 60MB by default (this can be changed with the **-size** option). The Halvade Uploader will automatically upload these preprocessed files to the given output directory on either local scratch, GPFS, HDFS, Amazon S3 or any other distirubted file system. 
+The Halvade Uploader will preprocesses the FASTQ files, this will interleave the paired-end reads and split the files in pieces of 60MB by default (this can be changed with the **-size** option). The Halvade Uploader will automatically upload these preprocessed files to the given output directory on either local scratch, GPFS, HDFS, Amazon S3 or any other distirubted file system. Note that the output of this step is the input of the Halvade command. 
 
 .. note:: This step is not required if the input file is an aligned BAM file.
 

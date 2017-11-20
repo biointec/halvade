@@ -11,7 +11,7 @@ Required options
 -B STR			Binary location. This string gives the location where bin.tar.gz is located. 
 -D STR			DBSNP file location. This string gives the absolute filename of the DBSNP file, this file needs 
 				to be compatible with the reference FASTA file provided by the –R option.
--I STR			Input directory. The string points to the directory containing the preprocessed input or BAM file
+-I STR			Input directory. The string points to the directory containing the preprocessed input (output of HalvadeUploader) or a BAM file
 				on the used file system.
 -O STR			Output directory. This string points to the directory which will contain the output VCF file 
 				of Halvade. 
