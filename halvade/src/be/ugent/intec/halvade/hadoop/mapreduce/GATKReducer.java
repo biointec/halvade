@@ -138,6 +138,7 @@ public abstract class GATKReducer extends HalvadeReducer {
         }
 
         Logger.DEBUG(reads + " reads processed in elPrep");
+        count = reads;
         context.getCounter(HalvadeCounters.IN_PREP_READS).increment(reads);
 
         if (gff != null) {
@@ -176,7 +177,7 @@ public abstract class GATKReducer extends HalvadeReducer {
 
         long startTime = System.currentTimeMillis();
 
-        int count = 0;
+//        count = 0;
         SAMRecord sam;
         while (input.hasNext()) {
             sam = input.next();

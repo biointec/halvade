@@ -43,7 +43,7 @@ public class VCFCombineReducer extends Reducer<LongWritable, VariantContextWrita
     RecordWriter<LongWritable,VariantContextWritable> recordWriter;
     VariantContextWritable tmpVar;
     VariantContextWritable bestVar;
-    boolean reportBest = false;
+    boolean reportAllVariants = false;
 
     @Override
     public void run(Context context) throws IOException, InterruptedException {
@@ -55,7 +55,11 @@ public class VCFCombineReducer extends Reducer<LongWritable, VariantContextWrita
     protected void reduce(LongWritable key, Iterable<VariantContextWritable> values, Context context) throws IOException, InterruptedException {
         Iterator<VariantContextWritable> it = values.iterator();
         // find vcf with best quality
-        if(reportBest) {
+        if(reportAllVariants) {
+            while(it.hasNext()){
+                recordWriter.write(key, it.next());
+            }
+        } else {
             if(it.hasNext())
                 bestVar = it.next();
             while(it.hasNext()){
@@ -64,10 +68,6 @@ public class VCFCombineReducer extends Reducer<LongWritable, VariantContextWrita
                     bestVar = tmpVar;            
             }
             recordWriter.write(key, bestVar);
-        } else {
-            while(it.hasNext()){
-                recordWriter.write(key, it.next());
-            }
         }
     }
 
@@ -78,7 +78,7 @@ public class VCFCombineReducer extends Reducer<LongWritable, VariantContextWrita
             outpFormat = new KeyIgnoringVCFOutputFormat(VCFFormat.VCF);
             String input = HalvadeConf.getInputDir(context.getConfiguration());
             String output = HalvadeConf.getOutDir(context.getConfiguration());
-            reportBest = HalvadeConf.getReportAllVariant(context.getConfiguration());
+            reportAllVariants = HalvadeConf.getReportAllVariant(context.getConfiguration());
             FileSystem fs = FileSystem.get(new URI(input), context.getConfiguration());
             Path firstVcfFile = null;
             if (fs.getFileStatus(new Path(input)).isDirectory()) {
