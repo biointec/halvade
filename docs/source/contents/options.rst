@@ -37,7 +37,7 @@ Optional options
 --fbed STR			Filter on bed. This option will enable the reads to be filtered on the given bed file before performing the GATK steps. This is typically used in an exome dataset where only reads in a known bed file are expected.
 --filter_dbsnp		Filter dbsnp. This flag turns on filtering of the dbSNP file before using it in the GATK. This can improve performance in some cases but typically the overhead of converting is too big. 
 --gff STR			GFF file. This sets the GFF file that will be used by Featurecounts to count the number of reads per exon.
--H, --haplotypecaller		HaplotypeCaller. With this option Halvade will use the HaplotypeCaller tool from GATK instead of the UnifiedGenotyper tool, which is used by default. This is the newer variant caller which is slower but more accurate.
+-U, --unifiedgenotyper		UnifiedGenotyper. With this option Halvade will use the UnifiedGenotyper tool from GATK instead of the HaplotypeCaller tool, which is used by default. The UnifiedGenotyper is faster but less accurate.
 --id STR			Read Group ID. This string sets the Read Group ID which will be used when adding Read Group information to the intermediate results. [GROUP1]
 --illumina			Convert Illumina scores. This Option forces Halvade to convert every basepair quality to the Illumina format. 
 -J STR				Java. This string sets the location of the Java binary, this file should be present on every node in the cluster. If this is not set Halvade with use the default Java. This can be used if the default Java is 1.6 and GATK requires version 1.7.
