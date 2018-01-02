@@ -169,6 +169,7 @@ public class HalvadeReducer extends Reducer<ChromosomeRegion, SAMRecordWritable,
             Logger.EXCEPTION(ex);
             throw new InterruptedException();
         }
+        
     }
     
     protected void getReadGroupData(Configuration conf) {

@@ -141,7 +141,7 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
         tmpDir = HalvadeConf.getScratchTempDir(context.getConfiguration());
         refDir = HalvadeConf.getRefDirOnScratch(context.getConfiguration());
         keep = HalvadeConf.getKeepFiles(context.getConfiguration());
-        requireUploadToHDFS = HalvadeConf.getRequireRefUpload(context.getConfiguration());
+        requireUploadToHDFS = HalvadeConf.getReuploadStar(context.getConfiguration());
         out = HalvadeConf.getOutDir(context.getConfiguration()); 
         jobId = context.getJobID().toString();
         taskId = context.getTaskAttemptID().toString();

@@ -42,6 +42,14 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Mapper;
+import be.ugent.intec.halvade.utils.HalvadeFileConstants;
+import be.ugent.intec.halvade.utils.HalvadeFileUtils;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 
 /**
  *
@@ -53,6 +61,7 @@ public class HalvadeOptions {
     public String in;
     public String out;
     public String ref;
+    public Boolean local;
     public String STARGenome = null;
     public String java = null;
     public String gff = null;
@@ -96,7 +105,7 @@ public class HalvadeOptions {
     public String bedFile = null;
     public String filterBed = null;
     public String bedRegion = null;
-    public String halvadeBinaries;
+    public String halvadeBinaries = null; 
     public String bin;
     public String readCountsPerRegionFile = null;
     public boolean combineVcf = true;
@@ -125,7 +134,6 @@ public class HalvadeOptions {
     protected static final double REDUCE_TASKS_FACTOR = 1.68 * 15;
     protected static final double DEFAULT_COVERAGE = 50;
     protected static final double DEFAULT_COVERAGE_SIZE = 86;
-    protected static final String DICT_SUFFIX = ".dict";
 
     public int GetOptions(String[] args, Configuration hConf) throws IOException, URISyntaxException {
         try {
@@ -134,26 +142,28 @@ public class HalvadeOptions {
                 HelpFormatter formatter = new HelpFormatter();
                 formatter.setWidth(80);
                 formatter.printHelp("hadoop jar HalvadeWithLibs.jar -I <IN> -O <OUT> "
-                        + "-R <REF> -D <SITES> -B <BIN> -N <nodes> -M <mem> -C <cores> [options]", options);
+                        + "-R <REF> -B <BIN> -N <nodes> -M <mem> -C <cores> [options]", options);
                 return 1;
             }
             onedec = new DecimalFormat("###0.0");
             // add parameters to configuration:
-            HalvadeConf.setRequireRefUpload(hConf, (localRefDir == null && nodes > 1));
+            HalvadeConf.setRefIsLocal(hConf, local);
+            HalvadeConf.setReuploadStar(hConf, (!local && nodes > 1));
             if(rnaPipeline) 
-                Logger.DEBUG("requires star genome 2 upload? " + (localRefDir != null || nodes > 1));
+                Logger.DEBUG("requires star genome 2 upload? " + (!local || nodes > 1));
             if (localRefDir == null) {
                 localRefDir = tmpDir;
             }
             HalvadeConf.setScratchTempDir(hConf, tmpDir);
             HalvadeConf.setRefDirOnScratch(hConf, localRefDir);
-            HalvadeConf.setRefOnHDFS(hConf, ref);
+            HalvadeConf.setRef(hConf, ref);
             if (STARGenome != null) {
                 HalvadeConf.setStarDirOnHDFS(hConf, STARGenome);
             }
             if(hdfsSites != null) {
                 HalvadeConf.setKnownSitesOnHDFS(hConf, hdfsSites);
             }
+            HalvadeConf.setAligner(hConf, aln);
             HalvadeConf.setIsPaired(hConf, paired);
             HalvadeConf.setIsRNA(hConf, rnaPipeline);
             if (bedFile != null) {
@@ -204,13 +214,15 @@ public class HalvadeOptions {
             if (stand_emit_conf > 0) {
                 HalvadeConf.setSEC(hConf, stand_emit_conf);
             }
+            
+            HalvadeFileUtils.checkReferenceFilesAvailable(hConf);
 
         } catch (ParseException e) {
             Logger.DEBUG(e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
             formatter.setWidth(80);
             formatter.printHelp("hadoop jar HalvadeWithLibs.jar -I <input> -O <output> "
-                    + "-R <ref> -D <dbsnp> -B <bin> -nodes <nodes> -mem <mem> -vcores <cores> [options]", options);
+                    + "-R <ref> -B <bin> -nodes <nodes> -mem <mem> -vcores <cores> [options]", options);
             return 1;
         }
         return 0;
@@ -277,12 +289,21 @@ public class HalvadeOptions {
         }
         return (size / (1024 * 1024 * 1024));
     }
+    
+    protected String getDictNameFromFasta(String fasta) throws IOException { 
+        if (fasta.endsWith(HalvadeFileConstants.FASTA_SUFFIX))
+            return fasta.replace(HalvadeFileConstants.FASTA_SUFFIX, HalvadeFileConstants.DICT_SUFFIX);
+        else if (fasta.endsWith(HalvadeFileConstants.FA_SUFFIX))
+            return fasta.replace(HalvadeFileConstants.FA_SUFFIX, HalvadeFileConstants.DICT_SUFFIX);
+        else throw new IOException("Fasta reference should have a .fasta or .fa suffix.");
+    }
 
-    protected void parseDictFile(Configuration conf) {
-        be.ugent.intec.halvade.utils.Logger.DEBUG("parsing dictionary " + ref + DICT_SUFFIX);
+    protected void parseDictFile(Configuration conf) throws IOException {
+        be.ugent.intec.halvade.utils.Logger.DEBUG("parsing dictionary " + getDictNameFromFasta(ref));
         try {
-            FileSystem fs = FileSystem.get(new URI(ref + DICT_SUFFIX), conf);
-            FSDataInputStream stream = fs.open(new Path(ref + DICT_SUFFIX));
+            String DictFilename = getDictNameFromFasta(ref);
+            FileSystem fs = FileSystem.get(new URI(DictFilename), conf);
+            FSDataInputStream stream = fs.open(new Path(DictFilename));
             String line = getLine(stream); // header
             dict = new SAMSequenceDictionary();
             line = getLine(stream);
@@ -335,9 +356,8 @@ public class HalvadeOptions {
                 .create("O");
         Option optBin = OptionBuilder.withArgName("bin.tar.gz")
                 .hasArg()
-                .isRequired(true)
                 .withDescription("The tarred file containing all binary files located on HDFS.")
-                .create("B");
+                .create("B"); // find bin.tar.gz in directory of java !!! if not given, throw error if no .tar.gz file is found
         Option optRef = OptionBuilder.withArgName("reference")
                 .hasArg()
                 .isRequired(true)
@@ -385,11 +405,11 @@ public class HalvadeOptions {
                 .withDescription("Sets the location for temporary files on every node [/tmp/halvade/].")
                 .withLongOpt("tmp")
                 .create();
-        Option optrefdir = OptionBuilder.withArgName("dir")
-                .hasArg()
-                .withDescription("Sets the folder containing all the reference files for BWA or STAR and GATK on every node [tmp directory].")
-                .withLongOpt("refdir")
-                .create();
+//        Option optrefdir = OptionBuilder.withArgName("dir")
+//                .hasArg()
+//                .withDescription("Sets the folder containing all the reference files for BWA or STAR and GATK on every node [tmp directory].")
+//                .withLongOpt("refdir")
+//                .create();
         Option optJava = OptionBuilder.withArgName("java")
                 .hasArg()
                 .withDescription("Set location of java binary to use [must be 1.7+].")
@@ -574,9 +594,10 @@ public class HalvadeOptions {
         options.addOption(optOut);
         options.addOption(optRef);
         options.addOption(optSites);
+        
         options.addOption(optBin);
         options.addOption(optTmp);
-        options.addOption(optrefdir);
+//        options.addOption(optrefdir);
         options.addOption(optSingle);
         options.addOption(optAln);
         options.addOption(optID);
@@ -629,8 +650,10 @@ public class HalvadeOptions {
         options.addOption(optOutGVCF);
         options.addOption(optIndelRealn);
     }
+    
 
-    protected boolean parseArguments(String[] args, Configuration halvadeConf) throws ParseException {
+
+    protected boolean parseArguments(String[] args, Configuration halvadeConf) throws ParseException, IOException, URISyntaxException {
         createOptions();
         CommandLineParser parser = new GnuParser();
         CommandLine line = parser.parse(options, args);
@@ -643,11 +666,54 @@ public class HalvadeOptions {
             out += "/";
         }
         ref = line.getOptionValue("R");
+        if(!(ref.endsWith(HalvadeFileConstants.FASTA_SUFFIX) || ref.endsWith(HalvadeFileConstants.FA_SUFFIX))) {
+            throw new IOException("Fasta reference should have a .fasta or .fa suffix.");
+        }
+        // check if ref is on distributed or local filesystem:
+        FileSystem fs = FileSystem.get(new URI(ref), halvadeConf);
+        if(fs.getClass().getName().equalsIgnoreCase(HalvadeFileConstants.DFS)) {
+            local = false;
+        } else if (fs.getClass().getName().equalsIgnoreCase(HalvadeFileConstants.LOCALFS)) {
+            local = true;
+        }
+        Logger.DEBUG("reference file is on " + ( local ? "local disk" : "a distributed fs (HDFS)"));
+        // check if the other files are present??
         if (line.hasOption("D")) {
             sites = line.getOptionValue("D");
             hdfsSites = sites.split(",");
         }
-        halvadeBinaries = line.getOptionValue("B");
+        if (line.hasOption("B")) {
+            halvadeBinaries = line.getOptionValue("B");
+        } else {
+            // find tar.gz files in current working directory:
+            File wd = new File(System.getProperty("user.dir"));
+            File[] matchingFiles = wd.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return name.endsWith("tar.gz");
+                }
+            });
+            for(int i = 0; i < matchingFiles.length; i++) {
+                TarArchiveInputStream tin = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(matchingFiles[i])));
+                ArchiveEntry entry = tin.getNextTarEntry();
+                // check for at least gatk and bwa
+                Boolean gatk = false;
+                while (entry != null) {
+                    if (entry.isDirectory()) {
+                        entry = tin.getNextTarEntry();
+                        continue;
+                    }
+                    if(entry.getName().contains("GenomeAnalysisTK.jar")) gatk = true;
+                    entry = tin.getNextTarEntry();
+                }
+                if(gatk) {
+                    halvadeBinaries = matchingFiles[i].getAbsolutePath();
+                    Logger.DEBUG("found binary archive: " + matchingFiles[i].getAbsolutePath());
+                    break;
+                }
+            }
+            if(halvadeBinaries == null)
+                throw new IOException("No binaries archive found, please provide the location with the -B argument or make sure it is present in the current directory: " + wd.getAbsolutePath());
+        }
         if (line.hasOption("bam")) {
             useBamInput = true;
         }
@@ -656,8 +722,6 @@ public class HalvadeOptions {
         }
         if (line.hasOption("skip_bqsr")) {
             skipBQSR = true;
-        } else if (sites == null) {
-            throw new ParseException("The '-D' option is required if the '-skip_bqsr' option is not given.");
         }
         if (line.hasOption("rna")) {
             rnaPipeline = true;
@@ -675,12 +739,12 @@ public class HalvadeOptions {
         if (line.hasOption("stargtf")) {
             stargtf = line.getOptionValue("stargtf");
         }
-        if (line.hasOption("refdir")) {
-            localRefDir = line.getOptionValue("refdir");
-            if (!localRefDir.endsWith("/")) {
-                localRefDir += "/";
-            }
-        }
+//        if (line.hasOption("refdir")) {
+//            localRefDir = line.getOptionValue("refdir");
+//            if (!localRefDir.endsWith("/")) {
+//                localRefDir += "/";
+//            }
+//        }
         if (line.hasOption("nodes")) {
             nodes = Integer.parseInt(line.getOptionValue("nodes"));
         }

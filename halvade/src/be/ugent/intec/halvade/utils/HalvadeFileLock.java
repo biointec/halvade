@@ -66,6 +66,7 @@ public class HalvadeFileLock {
           file.close();
     }
     
+    // TODO remove locks also and use the other files to check if the file is present. perhaps a hidden crc file?? 
     public void releaseLock() throws IOException {
         if (lock != null && lock.isValid())
           lock.release();

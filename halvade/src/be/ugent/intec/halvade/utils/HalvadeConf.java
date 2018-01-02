@@ -321,12 +321,12 @@ public class HalvadeConf {
         return task == Integer.parseInt(conf.get("mapred.map.tasks"));        
     }
     
-    private static final String refOnHDFSName = "hdfsref";
-    public static void setRefOnHDFS(Configuration conf, String val) {
-        conf.set(refOnHDFSName, val);
+    private static final String refName = "refName";
+    public static void setRef(Configuration conf, String val) {
+        conf.set(refName, val);
     }    
-    public static String getRefOnHDFS(Configuration conf) {
-        return conf.get(refOnHDFSName);
+    public static String getRef(Configuration conf) {
+        return conf.get(refName);
     }
     
     private static final String starDirOnHDFSName = "hdfsSTARref";
@@ -600,12 +600,20 @@ public class HalvadeConf {
             return false;
     }
     
-    private static final String refDirIsSet = "refDirIsSet";
-    public static void setRequireRefUpload(Configuration conf, boolean val) {
-        conf.setBoolean(refDirIsSet, val);
+    private static final String localRef = "refIsLocal";
+    public static void setRefIsLocal(Configuration conf, boolean val) {
+        conf.setBoolean(localRef, val);
     }
-    public static boolean getRequireRefUpload(Configuration conf) {
-        return conf.getBoolean(refDirIsSet, false);
+    public static boolean getRefIsLocal(Configuration conf) {
+        return conf.getBoolean(localRef, false);
+    }
+        
+    private static final String reuploadStar = "reuploadStar";
+    public static void setReuploadStar(Configuration conf, boolean val) {
+        conf.setBoolean(reuploadStar, val);
+    }
+    public static boolean getReuploadStar(Configuration conf) {
+        return conf.getBoolean(reuploadStar, false);
     }
     
     private static final String fixQualEnc = "fixQualEnc";
@@ -614,6 +622,14 @@ public class HalvadeConf {
     }
     public static boolean getFixQualEnc(Configuration conf) {
         return conf.getBoolean(fixQualEnc, false);
+    }
+    
+    private static final String alignerUsed = "alignerUsed";
+    public static void setAligner(Configuration conf, int val) {
+        conf.setInt(alignerUsed, val);
+    }
+    public static int getAligner(Configuration conf) {
+        return conf.getInt(alignerUsed, 1);
     }
 
     private static final String splitntrim = "SplitNTrim";

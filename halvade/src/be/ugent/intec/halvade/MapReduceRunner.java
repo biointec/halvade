@@ -36,7 +36,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import be.ugent.intec.halvade.utils.Logger;
 import be.ugent.intec.halvade.utils.HalvadeConf;
-import be.ugent.intec.halvade.utils.HalvadeFileUtils;
+import be.ugent.intec.halvade.utils.HalvadeFileConstants;
 import be.ugent.intec.halvade.utils.Timer;
 import org.seqdoop.hadoop_bam.BAMInputFormat;
 import org.seqdoop.hadoop_bam.VCFInputFormat;
@@ -63,14 +63,16 @@ public class MapReduceRunner extends Configured implements Tool  {
     @Override
     public int run(String[] strings) throws Exception {
         int ret = 0;
-        pass2suffix = HalvadeFileUtils.HALVADE_STAR_SUFFIX_P2 + new SimpleDateFormat("-ddMMyy-hhmmss.SSS").format(new Date());
+        pass2suffix = HalvadeFileConstants.HALVADE_STAR_SUFFIX_P2 + new SimpleDateFormat("-ddMMyy-hhmmss.SSS").format(new Date());
         try {
             Configuration halvadeConf = getConf();
             halvadeOpts = new HalvadeOptions();
             int optReturn = halvadeOpts.GetOptions(strings, halvadeConf);
             if (optReturn != 0) return optReturn;
-            
             String halvadeDir = halvadeOpts.out + "/halvade";
+            
+//            testFunction(halvadeConf);
+            // this runs Halvade!! on comments to test things with testFunction!!
             if(!halvadeOpts.justCombine) {
                 if(halvadeOpts.rnaPipeline) {
                     if(!halvadeOpts.useBamInput) {
@@ -100,6 +102,11 @@ public class MapReduceRunner extends Configured implements Tool  {
             Logger.EXCEPTION(e);
         }
         return ret;
+    }
+    
+    protected void testFunction(Configuration conf) throws URISyntaxException, IOException {
+        halvadeOpts.splitChromosomes(conf, 5);
+        
     }
     
     protected int runPass1RNAJob(Configuration pass1Conf, String tmpOutDir) throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException {

@@ -44,6 +44,7 @@ public class BWAMemInstance extends AlignerInstance {
         taskId = context.getTaskAttemptID().toString();
         taskId = taskId.substring(taskId.indexOf("m_"));
         ref = HalvadeFileUtils.downloadBWAIndex(context, taskId);
+        System.out.println("reference: " + ref);
     }
     
     public int feedLine(String line) throws IOException  {
