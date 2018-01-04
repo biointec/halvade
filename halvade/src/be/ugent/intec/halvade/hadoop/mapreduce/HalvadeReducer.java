@@ -86,9 +86,9 @@ public class HalvadeReducer extends Reducer<ChromosomeRegion, SAMRecordWritable,
         }
         if(output != null && checkVcfIsNotEmpty(output)) {        
             try {
-                HalvadeFileUtils.uploadFileToHDFS(context, FileSystem.get(new URI(outputdir), context.getConfiguration()),
+                HalvadeFileUtils.uploadFileToHDFS(FileSystem.get(new URI(outputdir), context.getConfiguration()),
                         output, outputdir + context.getTaskAttemptID().toString() + ".vcf");
-                HalvadeFileUtils.uploadFileToHDFS(context, FileSystem.get(new URI(outputdir), context.getConfiguration()), 
+                HalvadeFileUtils.uploadFileToHDFS(FileSystem.get(new URI(outputdir), context.getConfiguration()), 
                         output + ".idx", outputdir + context.getTaskAttemptID().toString() + ".vcf.idx");
             } catch (URISyntaxException ex) {
                 Logger.EXCEPTION(ex);
@@ -164,7 +164,7 @@ public class HalvadeReducer extends Reducer<ChromosomeRegion, SAMRecordWritable,
         variantFiles = new ArrayList<>();
         bin  = checkBinaries(context);
         try {
-            ref = HalvadeFileUtils.downloadGATKIndex(context, taskId);
+            ref = HalvadeFileUtils.downloadGATKIndex(context);
         } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);
             throw new InterruptedException();

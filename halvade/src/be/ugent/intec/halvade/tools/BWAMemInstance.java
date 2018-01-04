@@ -43,7 +43,7 @@ public class BWAMemInstance extends AlignerInstance {
         super(context, bin, task);
         taskId = context.getTaskAttemptID().toString();
         taskId = taskId.substring(taskId.indexOf("m_"));
-        ref = HalvadeFileUtils.downloadBWAIndex(context, taskId);
+        ref = HalvadeFileUtils.downloadBWAIndex(context);
         System.out.println("reference: " + ref);
     }
     

@@ -94,7 +94,7 @@ public abstract class GATKReducer extends HalvadeReducer {
         scc = HalvadeConf.getSCC(context.getConfiguration(), isRNA);
         sec = HalvadeConf.getSEC(context.getConfiguration(), isRNA);
         try {
-            gff = HalvadeFileUtils.downloadGFF(context, taskId);
+            gff = HalvadeFileUtils.downloadGFF(context);
         } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);
             throw new InterruptedException("Error when downloading GFF file");
@@ -145,7 +145,7 @@ public abstract class GATKReducer extends HalvadeReducer {
             Logger.DEBUG("featureCounts");
             context.setStatus("featureCounts");
             tools.runFeatureCounts(gff, samOut, fCounts, threads);
-            HalvadeFileUtils.uploadFileToHDFS(context, FileSystem.get(new URI(outputdir), context.getConfiguration()),
+            HalvadeFileUtils.uploadFileToHDFS(FileSystem.get(new URI(outputdir), context.getConfiguration()),
                     fCounts, outputdir + context.getTaskAttemptID().toString() + ".count");
         }
         context.setStatus("convert SAM to BAM");
@@ -210,7 +210,7 @@ public abstract class GATKReducer extends HalvadeReducer {
             Logger.DEBUG("featureCounts");
             context.setStatus("featureCounts");
             tools.runFeatureCounts(gff, tmpOut3, fCounts, threads);
-            HalvadeFileUtils.uploadFileToHDFS(context, FileSystem.get(new URI(outputdir), context.getConfiguration()),
+            HalvadeFileUtils.uploadFileToHDFS(FileSystem.get(new URI(outputdir), context.getConfiguration()),
                     fCounts, outputdir + context.getTaskAttemptID().toString() + ".count");
             context.setStatus("convert SAM to BAM");
             Logger.DEBUG("convert SAM to BAM");
@@ -239,8 +239,7 @@ public abstract class GATKReducer extends HalvadeReducer {
             if (filterBedFile.endsWith(".gz")) {
                 exomebed += ".gz";
             }
-            HalvadeFileUtils.downloadFileFromHDFS(context, FileSystem.get(new URI(filterBedFile), context.getConfiguration()),
-                    filterBedFile, exomebed);
+            HalvadeFileUtils.downloadFileFromHDFS(FileSystem.get(new URI(filterBedFile), context.getConfiguration()), filterBedFile, exomebed, context.getConfiguration());
             if (exomebed.endsWith(".gz")) {
                 exomebed = HalvadeFileUtils.Unzip(exomebed);
             }
@@ -316,11 +315,7 @@ public abstract class GATKReducer extends HalvadeReducer {
         // copy output to keepBam folder in output if required!
         if (keepBam) {
             String keepBamOut = outputdir + "keepBam/";
-            HalvadeFileUtils.uploadFileToHDFS(context, 
-                                              FileSystem.get(new URI(outputdir), 
-                                              context.getConfiguration()),
-                                              output, 
-                                              keepBamOut + context.getTaskAttemptID().toString() + ".bam");
+            HalvadeFileUtils.uploadFileToHDFS(FileSystem.get(new URI(outputdir), context.getConfiguration()), output,  keepBamOut + context.getTaskAttemptID().toString() + ".bam");
         }
     }
 

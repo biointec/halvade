@@ -102,7 +102,7 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
         bw.close();
         File mergeFile = new File(mergeJS);
         Logger.DEBUG("written " + count + " lines to " + mergeJS);
-        HalvadeFileUtils.uploadFileToHDFS(context, fs, mergeFile.getAbsolutePath(), out + mergeFile.getName());
+        HalvadeFileUtils.uploadFileToHDFS(fs, mergeFile.getAbsolutePath(), out + mergeFile.getName());
 
         // build new genome ref
         String newGenomeDir = refDir + jobId + "-nsg/";
@@ -121,7 +121,7 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
             fs.mkdirs(new Path(pass2GenDir));
             File[] genFiles = starOut.listFiles();
             for(File gen : genFiles) {
-                HalvadeFileUtils.uploadFileToHDFS(context, fs, gen.getAbsolutePath(), pass2GenDir + gen.getName());
+                HalvadeFileUtils.uploadFileToHDFS(fs, gen.getAbsolutePath(), pass2GenDir + gen.getName());
             }
 //            HalvadeFileUtils.removeLocalDir(keep, newGenomeDir);
             Logger.DEBUG("Finished uploading new reference to " + pass2GenDir);
@@ -157,7 +157,7 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
         }
         bin = checkBinaries(context);
         try {
-            ref = HalvadeFileUtils.downloadGATKIndex(context, taskId);
+            ref = HalvadeFileUtils.downloadGATKIndex(context);
         } catch (URISyntaxException ex) {
             Logger.EXCEPTION(ex);
             throw new InterruptedException();

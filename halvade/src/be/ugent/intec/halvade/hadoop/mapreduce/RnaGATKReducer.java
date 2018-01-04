@@ -77,9 +77,10 @@ public class RnaGATKReducer extends GATKReducer {
     }
     private void removeStarGen2IfPresent(Configuration conf) {
         // check if star dir is present in /tmp/:
+        // todo make stargen 2 folder $tmp/$getPass2Suffix/
         String starGen = null;
         String Halvade_Star_Suffix_P2 = HalvadeConf.getPass2Suffix(conf);
-        starGen = HalvadeFileUtils.findFile(tmp, Halvade_Star_Suffix_P2 , true);
+        starGen = HalvadeFileUtils.findFile(tmp, Halvade_Star_Suffix_P2 , true); // What to do with thiss????
         if(starGen != null) {
             HalvadeFileUtils.removeLocalDir(keep, starGen);
         }

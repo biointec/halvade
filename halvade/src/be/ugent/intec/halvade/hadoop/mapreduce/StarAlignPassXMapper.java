@@ -60,7 +60,7 @@ public class StarAlignPassXMapper  extends HalvadeMapper<GenomeSJ, Text> {
         sj = new GenomeSJ();
         keep = HalvadeConf.getKeepFiles(context.getConfiguration());
         tmpDir = HalvadeConf.getScratchTempDir(context.getConfiguration());
-        star_shmem_lock = new HalvadeFileLock(context, tmpDir, SH_MEM_LOCK);
+        star_shmem_lock = new HalvadeFileLock(tmpDir, SH_MEM_LOCK);
         try {
             String binDir = checkBinaries(context);
             runPass2 = HalvadeConf.getIsPass2(context.getConfiguration());
@@ -103,7 +103,7 @@ public class StarAlignPassXMapper  extends HalvadeMapper<GenomeSJ, Text> {
             Logger.EXCEPTION(ex);
             throw ex;
         } finally {
-            star_shmem_lock.releaseLock();
+            star_shmem_lock.removeAndReleaseLock();
         }
     }
 }

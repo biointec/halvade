@@ -50,7 +50,7 @@ public class Cushaw2Instance extends AlignerInstance {
         super(context, bin, task);  
         taskId = context.getTaskAttemptID().toString();
         taskId = taskId.substring(taskId.indexOf("m_"));
-        ref = HalvadeFileUtils.downloadCushaw2Index(context, taskId);
+        ref = HalvadeFileUtils.downloadCushaw2Index(context);
         cushaw2CustomArgs = HalvadeConf.getCustomArgs(context.getConfiguration(), "cushaw2", "");
     }
     

@@ -37,6 +37,8 @@ import org.apache.hadoop.util.Tool;
 import be.ugent.intec.halvade.utils.Logger;
 import be.ugent.intec.halvade.utils.HalvadeConf;
 import be.ugent.intec.halvade.utils.HalvadeFileConstants;
+import be.ugent.intec.halvade.utils.HalvadeFileLock;
+import be.ugent.intec.halvade.utils.HalvadeFileUtils;
 import be.ugent.intec.halvade.utils.Timer;
 import org.seqdoop.hadoop_bam.BAMInputFormat;
 import org.seqdoop.hadoop_bam.VCFInputFormat;
@@ -63,7 +65,7 @@ public class MapReduceRunner extends Configured implements Tool  {
     @Override
     public int run(String[] strings) throws Exception {
         int ret = 0;
-        pass2suffix = HalvadeFileConstants.HALVADE_STAR_SUFFIX_P2 + new SimpleDateFormat("-ddMMyy-hhmmss.SSS").format(new Date());
+        pass2suffix = new SimpleDateFormat("-ddMMyy-hhmmss.SSS").format(new Date());
         try {
             Configuration halvadeConf = getConf();
             halvadeOpts = new HalvadeOptions();
@@ -71,27 +73,27 @@ public class MapReduceRunner extends Configured implements Tool  {
             if (optReturn != 0) return optReturn;
             String halvadeDir = halvadeOpts.out + "/halvade";
             
-//            testFunction(halvadeConf);
+            testFunction(halvadeConf);
             // this runs Halvade!! on comments to test things with testFunction!!
-            if(!halvadeOpts.justCombine) {
-                if(halvadeOpts.rnaPipeline) {
-                    if(!halvadeOpts.useBamInput) {
-                        ret = runPass1RNAJob(halvadeConf, halvadeOpts.out + "/pass1");
-                        if(ret != 0) {
-                            Logger.DEBUG("Halvade pass 1 job failed.");
-                            System.exit(-1);
-                        }
-                        HalvadeConf.setIsPass2(halvadeConf, true);
-                    }
-                    ret = runHalvadeJob(halvadeConf, halvadeDir, HalvadeResourceManager.RNA_SHMEM_PASS2);
-                } else {
-                    ret = runHalvadeJob(halvadeConf, halvadeDir, HalvadeResourceManager.DNA);
-                }
-                if(ret != 0) {
-                    Logger.DEBUG("Halvade job failed.");
-                    System.exit(-2);
-                }
-            }
+//            if(!halvadeOpts.justCombine) {
+//                if(halvadeOpts.rnaPipeline) {
+//                    if(!halvadeOpts.useBamInput) {
+//                        ret = runPass1RNAJob(halvadeConf, halvadeOpts.out + "/pass1");
+//                        if(ret != 0) {
+//                            Logger.DEBUG("Halvade pass 1 job failed.");
+//                            System.exit(-1);
+//                        }
+//                        HalvadeConf.setIsPass2(halvadeConf, true);
+//                    }
+//                    ret = runHalvadeJob(halvadeConf, halvadeDir, HalvadeResourceManager.RNA_SHMEM_PASS2);
+//                } else {
+//                    ret = runHalvadeJob(halvadeConf, halvadeDir, HalvadeResourceManager.DNA);
+//                }
+//                if(ret != 0) {
+//                    Logger.DEBUG("Halvade job failed.");
+//                    System.exit(-2);
+//                }
+//            }
             if(!halvadeOpts.dryRun &&  !halvadeOpts.mergeBam && !halvadeOpts.countOnly) {
                 if(halvadeOpts.combineVcf)
                     runCombineJob(halvadeDir, halvadeOpts.out + "/merge", false);
@@ -104,9 +106,9 @@ public class MapReduceRunner extends Configured implements Tool  {
         return ret;
     }
     
-    protected void testFunction(Configuration conf) throws URISyntaxException, IOException {
+    protected void testFunction(Configuration conf) throws URISyntaxException, IOException, InterruptedException {
         halvadeOpts.splitChromosomes(conf, 5);
-        
+        HalvadeFileUtils.downloadAlignerIndex(conf, HalvadeFileConstants.BWA_REF_FILES);
     }
     
     protected int runPass1RNAJob(Configuration pass1Conf, String tmpOutDir) throws IOException, InterruptedException, ClassNotFoundException, URISyntaxException {

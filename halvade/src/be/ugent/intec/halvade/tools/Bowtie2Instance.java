@@ -50,7 +50,7 @@ public class Bowtie2Instance extends AlignerInstance {
         super(context, bin, task);  
         taskId = context.getTaskAttemptID().toString();
         taskId = taskId.substring(taskId.indexOf("m_"));
-        ref = HalvadeFileUtils.downloadBowtie2Index(context, taskId);
+        ref = HalvadeFileUtils.downloadBowtie2Index(context);
         bowtie2CustomArgs = HalvadeConf.getCustomArgs(context.getConfiguration(), "bowtie2", "");
     }
     

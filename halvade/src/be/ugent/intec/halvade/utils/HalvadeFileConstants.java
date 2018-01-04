@@ -16,6 +16,7 @@ public class HalvadeFileConstants {
     public static final String DICT_SUFFIX = ".dict";
     public static final String DFS = "org.apache.hadoop.hdfs.DistributedFileSystem";
     public static final String LOCALFS = "org.apache.hadoop.fs.LocalFileSystem";
+    
     public static final String REF_LOCK = "down_ref.lock";
     public static final String GFF_LOCK = "down_gff.lock";
     public static final String STARG_LOCK = "down_starg.lock";
@@ -23,13 +24,14 @@ public class HalvadeFileConstants {
     public static final String DBSNP_LOCK = "down_snpdb.lock";
     
     
-    public static final String HALVADE_BWA_SUFFIX = ".bwa_ref";
-    public static final String HALVADE_BOWTIE2_SUFFIX = ".bowtie2_ref";
-    public static final String HALVADE_CUSHAW2_SUFFIX = ".cushaw2_ref";
-    public static final String HALVADE_GATK_SUFFIX = ".gatk_ref";
-    public static final String HALVADE_STAR_SUFFIX_P1 = ".star_ref";
-    public static final String HALVADE_STAR_SUFFIX_P2 = ".star_ref_p2";
-    public static final String HALVADE_DBSNP_SUFFIX = ".dbsnp";
+    // should not be necessary anymore!!
+//    public static final String HALVADE_BWA_SUFFIX = ".bwa_ref";
+//    public static final String HALVADE_BOWTIE2_SUFFIX = ".bowtie2_ref";
+//    public static final String HALVADE_CUSHAW2_SUFFIX = ".cushaw2_ref";
+//    public static final String HALVADE_GATK_SUFFIX = ".gatk_ref";
+//    public static final String HALVADE_STAR_SUFFIX_P1 = ".star_ref";
+//    public static final String HALVADE_STAR_SUFFIX_P2 = ".star_ref_p2";
+//    public static final String HALVADE_DBSNP_SUFFIX = ".dbsnp";
     
     public static final String[] BWA_REF_FILES = 
         {".fasta", ".fasta.amb", ".fasta.ann", ".fasta.bwt", ".fasta.pac", ".fasta.sa"}; 

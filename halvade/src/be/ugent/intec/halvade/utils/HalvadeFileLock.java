@@ -26,10 +26,12 @@ public class HalvadeFileLock {
     protected String dir, filename;
     protected TaskInputOutputContext context;
     
-    public HalvadeFileLock(TaskInputOutputContext context, String dir, String filename) {
+//    public HalvadeFileLock(TaskInputOutputContext context, String dir, String filename) {
+    public HalvadeFileLock(String dir, String filename) {
+        Logger.DEBUG("file lock: " + dir + " " + filename);
         this.dir = dir;
         this.filename = filename;
-        this.context = context;
+//        this.context = context;
     }
     
     public int read(ByteBuffer bytes) throws IOException {
@@ -50,7 +52,7 @@ public class HalvadeFileLock {
         while(lock == null) {
             if (i % loop == 0)  {
                 Logger.DEBUG("waiting for lock...");
-                context.setStatus("waiting for lock...");
+//                context.setStatus("waiting for lock...");
             }
             Thread.sleep(1000);
             i++;
@@ -66,11 +68,11 @@ public class HalvadeFileLock {
           file.close();
     }
     
-    // TODO remove locks also and use the other files to check if the file is present. perhaps a hidden crc file?? 
-    public void releaseLock() throws IOException {
-        if (lock != null && lock.isValid())
-          lock.release();
-        if (file != null)
-          file.close();
-    }
+//    // TODO remove locks also and use the other files to check if the file is present. perhaps a hidden crc file?? 
+//    public void releaseLock() throws IOException {
+//        if (lock != null && lock.isValid())
+//          lock.release();
+//        if (file != null)
+//          file.close();
+//    }
 }
