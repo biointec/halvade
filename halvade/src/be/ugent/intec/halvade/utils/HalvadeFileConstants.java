@@ -20,7 +20,6 @@ public class HalvadeFileConstants {
     public static final String REF_LOCK = "down_ref.lock";
     public static final String GFF_LOCK = "down_gff.lock";
     public static final String STARG_LOCK = "down_starg.lock";
-    public static final String STARG2_LOCK = "down_starg2.lock";
     public static final String DBSNP_LOCK = "down_snpdb.lock";
     
     

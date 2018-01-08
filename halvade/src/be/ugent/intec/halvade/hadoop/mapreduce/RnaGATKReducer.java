@@ -14,6 +14,7 @@ import be.ugent.intec.halvade.utils.Logger;
 import be.ugent.intec.halvade.utils.HalvadeConf;
 import be.ugent.intec.halvade.utils.HalvadeFileUtils;
 import be.ugent.intec.halvade.utils.SAMRecordIterator;
+import java.io.File;
 import org.seqdoop.hadoop_bam.SAMRecordWritable;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -28,16 +29,15 @@ public class RnaGATKReducer extends GATKReducer {
     @Override
     protected void processAlignments(Iterable<SAMRecordWritable> values, Context context, PreprocessingTools tools, GATKTools gatk) throws IOException, InterruptedException, URISyntaxException, QualityException {
         long startTime = System.currentTimeMillis();
+        // remove stargen2 after map steps!
         removeStarGen2IfPresent(context.getConfiguration());
         // temporary files
         String region = tmpFileBase + "-region.intervals";
-        String preprocess = tmpFileBase + ".bam";
+        String preprocess = tmpFileBase + "-1.bam";
         String tmpFile1 = tmpFileBase + "-2.bam";
         String tmpFile2 = tmpFileBase + "-3.bam";
         String tmpFile3 = tmpFileBase + "-4.bam";
         String snps = tmpFileBase + (outputGVCF ? ".g.vcf" : ".vcf");
-        String filteredSnps = tmpFileBase + "-filtered.vcf";    
-        String annotatedSnps = tmpFileBase + "-annotated.vcf";
         
         boolean useElPrep = HalvadeConf.getUseElPrep(context.getConfiguration());
         ChromosomeRange r = new ChromosomeRange();
@@ -66,6 +66,8 @@ public class RnaGATKReducer extends GATKReducer {
 //        cluster = 3;
 //        minFS = 30.0;
 //        maxQD = 2.0;
+//        String filteredSnps = tmpFileBase + "-filtered.vcf";    
+//        String annotatedSnps = tmpFileBase + "-annotated.vcf";
 //        annotateVariants(context, region, gatk, snps, annotatedSnps);
 //        filterVariants(context, region, gatk, annotatedSnps, filteredSnps);   
         
@@ -75,14 +77,13 @@ public class RnaGATKReducer extends GATKReducer {
         long estimatedTime = System.currentTimeMillis() - startTime;
         Logger.DEBUG("total estimated time: " + estimatedTime / 1000);
     }
+    
     private void removeStarGen2IfPresent(Configuration conf) {
-        // check if star dir is present in /tmp/:
-        // todo make stargen 2 folder $tmp/$getPass2Suffix/
-        String starGen = null;
-        String Halvade_Star_Suffix_P2 = HalvadeConf.getPass2Suffix(conf);
-        starGen = HalvadeFileUtils.findFile(tmp, Halvade_Star_Suffix_P2 , true); // What to do with thiss????
-        if(starGen != null) {
-            HalvadeFileUtils.removeLocalDir(keep, starGen);
+        String refDir = HalvadeConf.getScratchTempDir(conf);
+        String pass2uid = HalvadeConf.getPass2UID(conf);
+        File starGen = new File(refDir + pass2uid);
+        if(starGen.isDirectory()) {
+            HalvadeFileUtils.removeLocalDir(keep, starGen.getAbsolutePath());
         }
     }
     

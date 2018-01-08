@@ -47,6 +47,8 @@ import be.ugent.intec.halvade.utils.HalvadeFileUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -151,11 +153,11 @@ public class HalvadeOptions {
             HalvadeConf.setReuploadStar(hConf, (!local && nodes > 1));
             if(rnaPipeline) 
                 Logger.DEBUG("requires star genome 2 upload? " + (!local || nodes > 1));
-            if (localRefDir == null) {
-                localRefDir = tmpDir;
-            }
+//            if (localRefDir == null) {
+//                localRefDir = tmpDir;
+//            }
             HalvadeConf.setScratchTempDir(hConf, tmpDir);
-            HalvadeConf.setRefDirOnScratch(hConf, localRefDir);
+//            HalvadeConf.setRefDirOnScratch(hConf, localRefDir);
             HalvadeConf.setRef(hConf, ref);
             if (STARGenome != null) {
                 HalvadeConf.setStarDirOnHDFS(hConf, STARGenome);
@@ -192,7 +194,9 @@ public class HalvadeOptions {
             HalvadeConf.setReadGroup(hConf, "ID:" + RGID + " LB:" + RGLB + " PL:" + RGPL + " PU:" + RGPU + " SM:" + RGSM);
             HalvadeConf.setkeepChrSplitPairs(hConf, keepChrSplitPairs);
             if (STARGenome != null) {
-                HalvadeConf.setStarDirPass2HDFS(hConf, out);
+                String pass2uid = new SimpleDateFormat("-ddMMyy-hhmmss.SSS").format(new Date());
+                HalvadeConf.setPass2UID(hConf, pass2uid);
+                HalvadeConf.setStarDirPass2HDFS(hConf, out + pass2uid);
             }
             if (stargtf != null) {
                 HalvadeConf.setStarGtf(hConf, stargtf);

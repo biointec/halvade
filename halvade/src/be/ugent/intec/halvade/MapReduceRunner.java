@@ -60,12 +60,10 @@ public class MapReduceRunner extends Configured implements Tool  {
     protected final String RNA = " RNA job";
     protected final String DNA = " DNA job";
     protected HalvadeOptions halvadeOpts;
-    protected String pass2suffix;
             
     @Override
     public int run(String[] strings) throws Exception {
         int ret = 0;
-        pass2suffix = new SimpleDateFormat("-ddMMyy-hhmmss.SSS").format(new Date());
         try {
             Configuration halvadeConf = getConf();
             halvadeOpts = new HalvadeOptions();
@@ -116,7 +114,6 @@ public class MapReduceRunner extends Configured implements Tool  {
         HalvadeResourceManager.setJobResources(halvadeOpts, pass1Conf, HalvadeResourceManager.RNA_SHMEM_PASS1, !halvadeOpts.runsOnS3 && halvadeOpts.nodes == 1, halvadeOpts.useBamInput);
         int pass2Reduces = HalvadeResourceManager.getPass2Reduces(halvadeOpts);
         halvadeOpts.splitChromosomes(pass1Conf, pass2Reduces);
-        HalvadeConf.setPass2Suffix(pass1Conf, pass2suffix);
         
         Job pass1Job = Job.getInstance(pass1Conf, "Halvade pass 1 RNA pipeline");
         pass1Job.addCacheArchive(new URI(halvadeOpts.halvadeBinaries));
@@ -191,9 +188,7 @@ public class MapReduceRunner extends Configured implements Tool  {
             System.exit(-2);
         }
         if(halvadeOpts.useBamInput)
-            setHeaderFile(halvadeOpts.in, halvadeConf);     
-        if(halvadeOpts.rnaPipeline)
-            HalvadeConf.setPass2Suffix(halvadeConf, pass2suffix);
+            setHeaderFile(halvadeOpts.in, halvadeConf);
         
         Job halvadeJob = Job.getInstance(halvadeConf, "Halvade" + pipeline);
         halvadeJob.addCacheArchive(new URI(halvadeOpts.halvadeBinaries));

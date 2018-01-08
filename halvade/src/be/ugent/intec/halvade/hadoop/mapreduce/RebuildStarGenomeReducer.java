@@ -44,7 +44,6 @@ import org.apache.hadoop.mapreduce.Reducer;
  */
 public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritable, Text> {
     protected String tmpDir;
-    protected String refDir;
     protected String mergeJS;
     protected BufferedWriter bw;
     protected int count;
@@ -105,7 +104,8 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
         HalvadeFileUtils.uploadFileToHDFS(fs, mergeFile.getAbsolutePath(), out + mergeFile.getName());
 
         // build new genome ref
-        String newGenomeDir = refDir + jobId + "-nsg/";
+        String pass2uid = HalvadeConf.getPass2UID(context.getConfiguration());
+        String newGenomeDir = tmpDir + pass2uid;
         File starOut = new File(newGenomeDir);
         starOut.mkdirs();
         
@@ -126,10 +126,6 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
 //            HalvadeFileUtils.removeLocalDir(keep, newGenomeDir);
             Logger.DEBUG("Finished uploading new reference to " + pass2GenDir);
         }
-        // avoid downloading this ref to the node its been created to save space!
-        File pass2check = new File(newGenomeDir + HalvadeConf.getPass2Suffix(context.getConfiguration()));
-        pass2check.createNewFile();
-        Logger.DEBUG("create check file: " + pass2check.getAbsolutePath());
         HalvadeFileUtils.removeLocalFile(mergeJS);
     }
 
@@ -139,7 +135,7 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
         totalKeyCount = 0;
         keyFactors = new ArrayList<>();
         tmpDir = HalvadeConf.getScratchTempDir(context.getConfiguration());
-        refDir = HalvadeConf.getRefDirOnScratch(context.getConfiguration());
+//        refDir = HalvadeConf.getRefDirOnScratch(context.getConfiguration());
         keep = HalvadeConf.getKeepFiles(context.getConfiguration());
         requireUploadToHDFS = HalvadeConf.getReuploadStar(context.getConfiguration());
         out = HalvadeConf.getOutDir(context.getConfiguration()); 

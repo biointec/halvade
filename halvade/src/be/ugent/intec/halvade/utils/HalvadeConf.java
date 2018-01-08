@@ -181,11 +181,11 @@ public class HalvadeConf {
     }
     
     private static final String pass2Suffix = "pass2suffix";
-    public static void setPass2Suffix(Configuration conf, String val) {
+    public static void setPass2UID(Configuration conf, String val) {
         conf.set(pass2Suffix, val);
-        Logger.DEBUG("setting 2 pass suffix to: " + val);
+        Logger.DEBUG("pass 2 UID: " + val);
     }
-    public static String getPass2Suffix(Configuration conf) {
+    public static String getPass2UID(Configuration conf) {
         return conf.get(pass2Suffix);
     }
     
@@ -232,13 +232,13 @@ public class HalvadeConf {
         return conf.get(readgroup);
     }
     
-    private static final String refOnScratchName = "scratchref";
-    public static void setRefDirOnScratch(Configuration conf, String val) {
-        conf.set(refOnScratchName, val);
-    }
-    public static String getRefDirOnScratch(Configuration conf) {
-        return conf.get(refOnScratchName);
-    }
+//    private static final String refOnScratchName = "scratchref";
+//    public static void setRefDirOnScratch(Configuration conf, String val) {
+//        conf.set(refOnScratchName, val);
+//    }
+//    public static String getRefDirOnScratch(Configuration conf) {
+//        return conf.get(refOnScratchName);
+//    }
     
     private static final String sitesOnHDFSName = "hdfssites";
     private static final String numberOfSites = "numsites";
@@ -331,19 +331,21 @@ public class HalvadeConf {
     
     private static final String starDirOnHDFSName = "hdfsSTARref";
     public static void setStarDirOnHDFS(Configuration conf, String val) {
-        conf.set(starDirOnHDFSName, val);
+        if(!val.endsWith("/"))
+            conf.set(starDirOnHDFSName, val + "/");
+        else
+            conf.set(starDirOnHDFSName, val);
     }    
     public static String getStarDirOnHDFS(Configuration conf) {
         return conf.get(starDirOnHDFSName);
     }
     
     private static final String starDirPass2HDFSName = "hdfsSTARrefPass2";
-    private static final String pass2GenomeDirName = "pass2STARGenome/";
     public static void setStarDirPass2HDFS(Configuration conf, String val) {
         if(!val.endsWith("/"))
-            conf.set(starDirPass2HDFSName, val + "/" + pass2GenomeDirName);
+            conf.set(starDirPass2HDFSName, val + "/");
         else
-            conf.set(starDirPass2HDFSName, val + pass2GenomeDirName);
+            conf.set(starDirPass2HDFSName, val);
     }    
     public static String getStarDirPass2HDFS(Configuration conf) {
         return conf.get(starDirPass2HDFSName);
