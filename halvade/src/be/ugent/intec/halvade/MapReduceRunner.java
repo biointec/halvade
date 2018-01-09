@@ -71,27 +71,27 @@ public class MapReduceRunner extends Configured implements Tool  {
             if (optReturn != 0) return optReturn;
             String halvadeDir = halvadeOpts.out + "/halvade";
             
-            testFunction(halvadeConf);
+//            testFunction(halvadeConf);
             // this runs Halvade!! on comments to test things with testFunction!!
-//            if(!halvadeOpts.justCombine) {
-//                if(halvadeOpts.rnaPipeline) {
-//                    if(!halvadeOpts.useBamInput) {
-//                        ret = runPass1RNAJob(halvadeConf, halvadeOpts.out + "/pass1");
-//                        if(ret != 0) {
-//                            Logger.DEBUG("Halvade pass 1 job failed.");
-//                            System.exit(-1);
-//                        }
-//                        HalvadeConf.setIsPass2(halvadeConf, true);
-//                    }
-//                    ret = runHalvadeJob(halvadeConf, halvadeDir, HalvadeResourceManager.RNA_SHMEM_PASS2);
-//                } else {
-//                    ret = runHalvadeJob(halvadeConf, halvadeDir, HalvadeResourceManager.DNA);
-//                }
-//                if(ret != 0) {
-//                    Logger.DEBUG("Halvade job failed.");
-//                    System.exit(-2);
-//                }
-//            }
+            if(!halvadeOpts.justCombine) {
+                if(halvadeOpts.rnaPipeline) {
+                    if(!halvadeOpts.useBamInput) {
+                        ret = runPass1RNAJob(halvadeConf, halvadeOpts.out + "/pass1");
+                        if(ret != 0) {
+                            Logger.DEBUG("Halvade pass 1 job failed.");
+                            System.exit(-1);
+                        }
+                        HalvadeConf.setIsPass2(halvadeConf, true);
+                    }
+                    ret = runHalvadeJob(halvadeConf, halvadeDir, HalvadeResourceManager.RNA_SHMEM_PASS2);
+                } else {
+                    ret = runHalvadeJob(halvadeConf, halvadeDir, HalvadeResourceManager.DNA);
+                }
+                if(ret != 0) {
+                    Logger.DEBUG("Halvade job failed.");
+                    System.exit(-2);
+                }
+            }
             if(!halvadeOpts.dryRun &&  !halvadeOpts.mergeBam && !halvadeOpts.countOnly) {
                 if(halvadeOpts.combineVcf)
                     runCombineJob(halvadeDir, halvadeOpts.out + "/merge", false);
@@ -116,7 +116,7 @@ public class MapReduceRunner extends Configured implements Tool  {
         halvadeOpts.splitChromosomes(pass1Conf, pass2Reduces);
         
         Job pass1Job = Job.getInstance(pass1Conf, "Halvade pass 1 RNA pipeline");
-        pass1Job.addCacheArchive(new URI(halvadeOpts.halvadeBinaries));
+        pass1Job.addCacheArchive(new URI("file://" + halvadeOpts.halvadeBinaries));
         pass1Job.setJarByClass(be.ugent.intec.halvade.hadoop.mapreduce.HalvadeMapper.class);
         // set pass 2 suffix so only this job finds it!
         FileSystem fs = FileSystem.get(new URI(halvadeOpts.in), pass1Conf);
@@ -191,7 +191,7 @@ public class MapReduceRunner extends Configured implements Tool  {
             setHeaderFile(halvadeOpts.in, halvadeConf);
         
         Job halvadeJob = Job.getInstance(halvadeConf, "Halvade" + pipeline);
-        halvadeJob.addCacheArchive(new URI(halvadeOpts.halvadeBinaries));
+        halvadeJob.addCacheArchive(new URI("file://" + halvadeOpts.halvadeBinaries));
         halvadeJob.setJarByClass(be.ugent.intec.halvade.hadoop.mapreduce.HalvadeMapper.class);
         addInputFiles(halvadeOpts.in, halvadeConf, halvadeJob);
         FileOutputFormat.setOutputPath(halvadeJob, new Path(tmpOutDir));

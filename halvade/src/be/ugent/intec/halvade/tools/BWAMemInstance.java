@@ -87,7 +87,7 @@ public class BWAMemInstance extends AlignerInstance {
         } catch (IOException ex) {
             Logger.EXCEPTION(ex);
         }
-                
+        
         int error = pbw.waitForCompletion();
         context.getCounter(HalvadeCounters.TIME_BWA_MEM).increment(pbw.getExecutionTime());
         if(error != 0)

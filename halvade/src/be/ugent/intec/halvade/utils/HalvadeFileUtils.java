@@ -30,9 +30,9 @@ import java.nio.ByteBuffer;
 import java.util.zip.GZIPInputStream;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.ChecksumException;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.TaskInputOutputContext;
 
 /**
@@ -66,27 +66,41 @@ public class HalvadeFileUtils {
         Path crc = new Path(file.getParent() + "/." + file.getName() + ".crc");
         return checkCrc(fs, file, crc);
     }
+    
     protected static boolean checkCrc(FileSystem fs, Path file, Path crc) throws IOException {
-        byte[] buf = new byte[(int)fs.getFileStatus(file).getLen()];
+        long startTime = System.currentTimeMillis();
+        byte[] buf = new byte[512*1024*1024];
+        long len = fs.getFileStatus(file).getLen();
+        long pos = 0;
         Boolean gotException = false;
-        InputStream in = fs.open(file); 
+        FSDataInputStream in = fs.open(file); 
         try { 
-          IOUtils.readFully(in, buf, 0, buf.length); 
+            int read = in.read(pos, buf, 0, buf.length);
+            pos += read;
+            while( pos < len ) {
+                read = in.read(pos, buf, 0, buf.length);
+                pos += read;
+            }
+//          IOUtils.readFully(in, buf, 0, buf.length);  // cant process more than 2gb files...
         } catch (ChecksumException e) {
             gotException = true; 
-        }
+        }   
         Logger.DEBUG("checksum of " + file + " is " + (gotException ? "incorrect, needs to be redownloaded" : "correct"));
         in.close(); 
+        long estimatedTime = System.currentTimeMillis() - startTime;
+        Logger.DEBUG("crc check time: " + estimatedTime +"ms");
         return !gotException;
+        // real check is 52m 16s (chr1)
+        // just return true here is  (crh1)
     }
         
     public static int downloadFileWithLock(FileSystem fs, HalvadeFileLock lock, String from, String to, Configuration conf) throws IOException, InterruptedException, URISyntaxException {
         Logger.DEBUG("downloading from " + from + " to " + to);
         try {
-            lock.getLock();
             Path toPath = new Path(to);
             Path fromPath = new Path(from);     
             File f = new File(to);
+            lock.getLock(); 
             if(!f.exists()) {
                 fs.copyToLocalFile(new Path(from), toPath);
             } else {
