@@ -22,11 +22,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.util.zip.GZIPInputStream;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.ChecksumException;
@@ -68,7 +66,6 @@ public class HalvadeFileUtils {
     }
     
     protected static boolean checkCrc(FileSystem fs, Path file, Path crc) throws IOException {
-        long startTime = System.currentTimeMillis();
         byte[] buf = new byte[512*1024*1024];
         long len = fs.getFileStatus(file).getLen();
         long pos = 0;
@@ -84,16 +81,14 @@ public class HalvadeFileUtils {
 //          IOUtils.readFully(in, buf, 0, buf.length);  // cant process more than 2gb files...
         } catch (ChecksumException e) {
             gotException = true; 
-        }   
+        }
         Logger.DEBUG("checksum of " + file + " is " + (gotException ? "incorrect, needs to be redownloaded" : "correct"));
-        in.close(); 
-        long estimatedTime = System.currentTimeMillis() - startTime;
-        Logger.DEBUG("crc check time: " + estimatedTime +"ms");
+        in.close();
         return !gotException;
         // real check is 52m 16s (chr1)
         // just return true here is  (crh1)
     }
-        
+
     public static int downloadFileWithLock(FileSystem fs, HalvadeFileLock lock, String from, String to, Configuration conf) throws IOException, InterruptedException, URISyntaxException {
         Logger.DEBUG("downloading from " + from + " to " + to);
         try {
@@ -163,26 +158,35 @@ public class HalvadeFileUtils {
     }
     
     public static Boolean checkReferenceFilesAvailable(Configuration conf) throws IOException, URISyntaxException {
-        String ref = HalvadeConf.getRef(conf);
         Boolean rnaPipeline = HalvadeConf.getIsRNA(conf);
-        int aln = HalvadeConf.getAligner(conf);
+        String missing_files = "";
+        String ref = HalvadeConf.getRef(conf);
         FileSystem fs = FileSystem.get(new URI(ref), conf);
         String suffix = ref.endsWith(HalvadeFileConstants.FASTA_SUFFIX) ? HalvadeFileConstants.FASTA_SUFFIX : HalvadeFileConstants.FA_SUFFIX;
-        String missing_files = "";
+        int aln = HalvadeConf.getAligner(conf);
         String[] stepOneRequiredFiles = (rnaPipeline ? HalvadeFileConstants.STAR_REF_FILES : HalvadeFileConstants.DNA_ALN_REF_FILES[aln]); 
         String[] stepTwoRequiredFiles = HalvadeFileConstants.GATK_REF_FILES;
-        for (int i = 0; i < stepOneRequiredFiles.length; i++) {
-            String newsuffix = stepOneRequiredFiles[i].replace(HalvadeFileConstants.FASTA_SUFFIX, suffix);
-            String newfile = ref.replace(suffix, newsuffix);
-            Boolean exists = fs.isFile(new Path(newfile));
-            if (!exists) {
-                Logger.DEBUG("gatk ref file [" + i + "] " + newfile + " is missing"); 
-                missing_files += "<ref_name>" + newsuffix + " ";
-            } // check should be done at a later stage, like if copy from hdfs to local scratch, else we assume its correct!
-//            else {
-//                Boolean check = HalvadeFileUtils.checkChecksum(new FileInputStream(newfile), fs.open(new Path(newfile)));
-//                Logger.DEBUG("gatk ref file [" + i + "] " + newfile + " is found and checksum is " + (check ? "correct" : "incorrect"));
-//            }
+        if (rnaPipeline) {
+            ref = HalvadeConf.getStarDirOnHDFS(conf);
+            fs = FileSystem.get(new URI(ref), conf);
+            for (int i = 0; i < stepOneRequiredFiles.length; i++) {
+                String newfile = ref+ stepOneRequiredFiles[i];
+                Boolean exists = fs.isFile(new Path(newfile));
+                if (!exists) {
+                    Logger.DEBUG("STAR ref file [" + i + "] " + newfile + " is missing"); 
+                    missing_files += "<star_genome/>" + stepOneRequiredFiles[i] + " ";
+                } 
+            }
+        } else {
+            for (int i = 0; i < stepOneRequiredFiles.length; i++) {
+                String newsuffix = stepOneRequiredFiles[i].replace(HalvadeFileConstants.FASTA_SUFFIX, suffix);
+                String newfile = ref.replace(suffix, newsuffix);
+                Boolean exists = fs.isFile(new Path(newfile));
+                if (!exists) {
+                    Logger.DEBUG("alignment ref file [" + i + "] " + newfile + " is missing"); 
+                    missing_files += "<ref_name>" + newsuffix + " ";
+                }
+            }
         }
         for (int i = 0; i < stepTwoRequiredFiles.length; i++) {
             String newsuffix = stepTwoRequiredFiles[i].replace(HalvadeFileConstants.FASTA_SUFFIX, suffix);
@@ -191,11 +195,7 @@ public class HalvadeFileUtils {
             if (!exists) {
                 Logger.DEBUG("gatk ref file [" + i + "] " + newfile + " is missing"); 
                 missing_files += "<ref_name>" + newsuffix + " ";
-            } 
-//            else {
-//                Boolean check = HalvadeFileUtils.checkChecksum(new FileInputStream(newfile), fs.open(new Path(newfile)));
-//                Logger.DEBUG("gatk ref file [" + i + "] " + newfile + " is found and checksum is " + (check ? "correct" : "incorrect"));
-//            }
+            }
         }
         if(!missing_files.equals("")) {
             throw new IOException("missing files: " + missing_files);
