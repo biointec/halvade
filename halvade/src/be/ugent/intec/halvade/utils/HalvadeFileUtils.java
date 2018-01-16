@@ -167,14 +167,14 @@ public class HalvadeFileUtils {
         String[] stepOneRequiredFiles = (rnaPipeline ? HalvadeFileConstants.STAR_REF_FILES : HalvadeFileConstants.DNA_ALN_REF_FILES[aln]); 
         String[] stepTwoRequiredFiles = HalvadeFileConstants.GATK_REF_FILES;
         if (rnaPipeline) {
-            ref = HalvadeConf.getStarDirOnHDFS(conf);
-            fs = FileSystem.get(new URI(ref), conf);
+            String starref = HalvadeConf.getStarDirOnHDFS(conf);
+            fs = FileSystem.get(new URI(starref), conf);
             for (int i = 0; i < stepOneRequiredFiles.length; i++) {
-                String newfile = ref+ stepOneRequiredFiles[i];
+                String newfile = starref+ stepOneRequiredFiles[i];
                 Boolean exists = fs.isFile(new Path(newfile));
                 if (!exists) {
                     Logger.DEBUG("STAR ref file [" + i + "] " + newfile + " is missing"); 
-                    missing_files += "<star_genome/>" + stepOneRequiredFiles[i] + " ";
+                    missing_files += "[star_genome]/" + stepOneRequiredFiles[i] + " ";
                 } 
             }
         } else {
@@ -184,7 +184,7 @@ public class HalvadeFileUtils {
                 Boolean exists = fs.isFile(new Path(newfile));
                 if (!exists) {
                     Logger.DEBUG("alignment ref file [" + i + "] " + newfile + " is missing"); 
-                    missing_files += "<ref_name>" + newsuffix + " ";
+                    missing_files += "[ref_name]" + newsuffix + " ";
                 }
             }
         }
@@ -194,7 +194,7 @@ public class HalvadeFileUtils {
             Boolean exists = fs.isFile(new Path(newfile)); 
             if (!exists) {
                 Logger.DEBUG("gatk ref file [" + i + "] " + newfile + " is missing"); 
-                missing_files += "<ref_name>" + newsuffix + " ";
+                missing_files += "[ref_name]" + newsuffix + " ";
             }
         }
         if(!missing_files.equals("")) {
@@ -340,18 +340,18 @@ public class HalvadeFileUtils {
         if(!refDir.endsWith("/")) refDir = refDir + "/"; // should already be with a / ...
         HalvadeFileLock lock = new HalvadeFileLock(refDir, HalvadeFileConstants.REF_LOCK);
         FileSystem fs = FileSystem.get(new URI(HDFSRef), conf);
-        String filebase = HalvadeConf.getPass2UID(conf);
+        String filebase = new Path(HDFSRef).getName() + "/";
         
         // download all files in folder and make sure its 
         try {
             for (String file : HalvadeFileConstants.STAR_REF_FILES) {
                 String newfile = HDFSRef + file;
-                downloadFileWithLock(fs, lock, newfile, refDir + filebase + newfile, context.getConfiguration());                
+                downloadFileWithLock(fs, lock, newfile, refDir + filebase + file, context.getConfiguration());                
             }
             for (String file : HalvadeFileConstants.STAR_REF_OPTIONAL_FILES) {
                 String newfile = HDFSRef + file;
                 if(fs.exists(new Path(newfile))) 
-                    downloadFileWithLock(fs, lock, newfile, refDir + filebase + newfile, context.getConfiguration());
+                    downloadFileWithLock(fs, lock, newfile, refDir + filebase + file, context.getConfiguration());
             }
             
         } catch (InterruptedException ex) {

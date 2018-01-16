@@ -194,7 +194,7 @@ public class HalvadeOptions {
             HalvadeConf.setReadGroup(hConf, "ID:" + RGID + " LB:" + RGLB + " PL:" + RGPL + " PU:" + RGPU + " SM:" + RGSM);
             HalvadeConf.setkeepChrSplitPairs(hConf, keepChrSplitPairs);
             if (STARGenome != null) {
-                String pass2uid = new SimpleDateFormat("-ddMMyy-hhmmss.SSS").format(new Date());
+                String pass2uid = new SimpleDateFormat("ddMMyyhhmmss.SSS").format(new Date());
                 HalvadeConf.setPass2UID(hConf, pass2uid);
                 HalvadeConf.setStarDirPass2HDFS(hConf, out + pass2uid);
             }
@@ -397,6 +397,7 @@ public class HalvadeOptions {
                 .create();
         Option optSites = OptionBuilder.withArgName("snpDBa,snpDBb")
                 .hasArg()
+                .isRequired(true)
                 .withDescription("Name of snpDB files for the genome on HDFS. If multiple separate with \',\'.")
                 .create("D");
         Option optStarGenome = OptionBuilder.withArgName("stargenome")
