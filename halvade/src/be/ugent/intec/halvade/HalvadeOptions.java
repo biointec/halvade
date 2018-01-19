@@ -144,7 +144,7 @@ public class HalvadeOptions {
                 HelpFormatter formatter = new HelpFormatter();
                 formatter.setWidth(80);
                 formatter.printHelp("hadoop jar HalvadeWithLibs.jar -I <IN> -O <OUT> "
-                        + "-R <REF> -B <BIN> -N <nodes> -M <mem> -C <cores> [options]", options);
+                        + "-R <REF> -D <VCF> --N <nodes> --M <mem> --C <cores> [options]", options);
                 return 1;
             }
             onedec = new DecimalFormat("###0.0");
@@ -226,7 +226,7 @@ public class HalvadeOptions {
             HelpFormatter formatter = new HelpFormatter();
             formatter.setWidth(80);
             formatter.printHelp("hadoop jar HalvadeWithLibs.jar -I <input> -O <output> "
-                    + "-R <ref> -B <bin> -nodes <nodes> -mem <mem> -vcores <cores> [options]", options);
+                    + "-R <ref> -D <VCF> -N <nodes> -M <mem> -C <cores> [options]", options);
             return 1;
         }
         return 0;
