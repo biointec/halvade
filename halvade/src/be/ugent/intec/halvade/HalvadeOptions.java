@@ -152,7 +152,7 @@ public class HalvadeOptions {
             HalvadeConf.setRefIsLocal(hConf, local);
             HalvadeConf.setReuploadStar(hConf, (!local && nodes > 1));
             if(rnaPipeline) 
-                Logger.DEBUG("requires star genome 2 upload? " + (!local || nodes > 1));
+                Logger.DEBUG("requires star genome 2 upload? " + (!local && nodes > 1));
 //            if (localRefDir == null) {
 //                localRefDir = tmpDir;
 //            }
