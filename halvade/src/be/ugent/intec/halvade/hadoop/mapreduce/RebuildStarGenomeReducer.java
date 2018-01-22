@@ -104,8 +104,12 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
         HalvadeFileUtils.uploadFileToHDFS(fs, mergeFile.getAbsolutePath(), out + mergeFile.getName());
 
         // build new genome ref
-        String pass2uid = HalvadeConf.getPass2UID(context.getConfiguration());
-        String newGenomeDir = tmpDir + pass2uid;
+        String pass2GenDir = HalvadeConf.getStarDirPass2HDFS(context.getConfiguration());
+        String newGenomeDir = pass2GenDir;
+        if(requireUploadToHDFS) {
+            String pass2uid = HalvadeConf.getPass2UID(context.getConfiguration());
+            newGenomeDir = tmpDir + pass2uid;
+        }
         File starOut = new File(newGenomeDir);
         starOut.mkdirs();
         
@@ -116,7 +120,6 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
         
         if(requireUploadToHDFS) {
             //upload to outputdir
-            String pass2GenDir = HalvadeConf.getStarDirPass2HDFS(context.getConfiguration());
             Logger.DEBUG("Uploading STAR genome to parallel filesystem...");
             fs.mkdirs(new Path(pass2GenDir));
             File[] genFiles = starOut.listFiles();
