@@ -119,7 +119,7 @@ public class HalvadeMapper<T1, T2> extends Mapper<LongWritable, Text, T1, T2> {
                     printDirectoryTree(list[i], level + 1);
             }
         } else {
-                    Logger.DEBUG(whitespace + "N");
+            Logger.DEBUG("empty directory " + dir);
         }
     }
 }

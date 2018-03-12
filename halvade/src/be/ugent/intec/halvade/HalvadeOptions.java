@@ -108,7 +108,7 @@ public class HalvadeOptions {
     public String filterBed = null;
     public String bedRegion = null;
     public String halvadeBinaries = null; 
-    public String bin;
+//    public String bin;
     public String readCountsPerRegionFile = null;
     public boolean combineVcf = true;
     public boolean dryRun = false;
@@ -711,7 +711,7 @@ public class HalvadeOptions {
                     entry = tin.getNextTarEntry();
                 }
                 if(gatk) {
-                    halvadeBinaries = matchingFiles[i].getAbsolutePath();
+                    halvadeBinaries = "file://" + matchingFiles[i].getAbsolutePath();
                     Logger.DEBUG("found binary archive: " + matchingFiles[i].getAbsolutePath());
                     break;
                 }

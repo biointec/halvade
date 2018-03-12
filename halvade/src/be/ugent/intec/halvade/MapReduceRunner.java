@@ -114,7 +114,7 @@ public class MapReduceRunner extends Configured implements Tool  {
         halvadeOpts.splitChromosomes(pass1Conf, pass2Reduces);
         
         Job pass1Job = Job.getInstance(pass1Conf, "Halvade pass 1 RNA pipeline");
-        pass1Job.addCacheArchive(new URI("file://" + halvadeOpts.halvadeBinaries));
+        pass1Job.addCacheArchive(new URI(halvadeOpts.halvadeBinaries));
         pass1Job.setJarByClass(be.ugent.intec.halvade.hadoop.mapreduce.HalvadeMapper.class);
         // set pass 2 suffix so only this job finds it!
         FileSystem fs = FileSystem.get(new URI(halvadeOpts.in), pass1Conf);
@@ -189,7 +189,7 @@ public class MapReduceRunner extends Configured implements Tool  {
             setHeaderFile(halvadeOpts.in, halvadeConf);
         
         Job halvadeJob = Job.getInstance(halvadeConf, "Halvade" + pipeline);
-        halvadeJob.addCacheArchive(new URI("file://" + halvadeOpts.halvadeBinaries));
+        halvadeJob.addCacheArchive(new URI(halvadeOpts.halvadeBinaries));
         halvadeJob.setJarByClass(be.ugent.intec.halvade.hadoop.mapreduce.HalvadeMapper.class);
         addInputFiles(halvadeOpts.in, halvadeConf, halvadeJob);
         FileOutputFormat.setOutputPath(halvadeJob, new Path(tmpOutDir));
