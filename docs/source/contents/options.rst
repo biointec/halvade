@@ -15,7 +15,7 @@ Required options
 				on the used file system.
 -O STR			Output directory. This string points to the directory which will contain the output VCF file 
 				of Halvade. 
--R STR			Reference Location. This string gives the prefix (without .fasta) of the absolute filename of 
+-R STR			Reference Location. This string gives the prefix (with .fasta extension) of the absolute filename of 
 				the reference in FASTA format. The corresponding index files, built with BWA, need to be in 
 				this directory having the same prefix as the reference FASTA file. The STAR genome index can 
 				be located in a different folder.
@@ -50,7 +50,6 @@ Optional options
 --pu STR			Read Group Platform Unit. This string sets the Read Group Platform Unit which will be used when adding Read Group information to the intermediate results. [UNIT1]
 --redistribute		Redistribute Cores. This is an optimization to better utilize the CPU cores at the end of the map phase, to improve load balancing. Only use when the cores per container is less than 4.
 --redmem INT		Reduce Memory. This sets the memory available for the containers assigned for the reduce tasks. 
---refdir STR		Reference directory. This sets the reference directory on local scratch, Halvade will use this directory to find existing references on each node. This directory needs to be accessible by all nodes, but can be a local disk or a network disk. Halvade finds the reference files by looking for files in the directory or subdirectory with these suffixes: .bwa_ref, .gatk_ref, .star_ref, .dbsnp. This folder is expected to be on local scratch or a mounted distributed filesystem so this doesn't require any prefix.
 --remove_dups		Remove Duplicates. This will remove the found PCR duplicates in the corresponding step.
 --report_all		Report all output. This option will give all VCF output records in the merged output file. By default the VCF record with the highest score will be kept if multiple records are found at the same location.
 --rna				RNA pipeline. This options enables Halvade to run the RNA-seq pipeline instead of the default DNA pipeline. This option requires an additional argument *S* which points to the STAR genome directory.
