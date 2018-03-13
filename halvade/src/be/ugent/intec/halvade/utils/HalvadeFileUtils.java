@@ -168,7 +168,7 @@ public class HalvadeFileUtils {
         String[] stepTwoRequiredFiles = HalvadeFileConstants.GATK_REF_FILES;
         if (rnaPipeline) {
             String starref = HalvadeConf.getStarDirOnHDFS(conf);
-            fs = FileSystem.get(new URI(starref), conf);
+            fs = FileSystem.get(new URI((local?"file://":"") + starref), conf);
             for (int i = 0; i < stepOneRequiredFiles.length; i++) {
                 String newfile = starref+ stepOneRequiredFiles[i];
                 Boolean exists = fs.isFile(new Path(newfile));
