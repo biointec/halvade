@@ -242,19 +242,22 @@ public class HalvadeConf {
     
     private static final String sitesOnHDFSName = "hdfssites";
     private static final String numberOfSites = "numsites";
-    public static void setKnownSitesOnHDFS(Configuration conf, String[] val) throws IOException, URISyntaxException {
+    public static void setKnownSitesOnHDFS(Configuration conf, String[] val, boolean local) throws IOException, URISyntaxException {
         conf.setInt(numberOfSites, val.length);
         FileSystem fs;
+        int j = 0;
         for(int i = 0; i < val.length;i ++) {
-            // check if dir add all files!
-            fs = FileSystem.get(new URI(val[i]), conf);
+            String path = ( local ? "file://" : "") + val[i];
+            fs = FileSystem.get(new URI(path), conf);
             if(fs.isFile(new Path(val[i]))) {
-                conf.set(sitesOnHDFSName + i, val[i]);
+                conf.set(sitesOnHDFSName + j, path);
+                j++;
             } else {
-                FileStatus[] files = fs.listStatus(new Path(val[i]));
+                FileStatus[] files = fs.listStatus(new Path(path));
                 for(FileStatus file : files) {
                     if (!file.isDirectory()) {
-                        conf.set(sitesOnHDFSName + i, file.getPath().toString());
+                        conf.set(sitesOnHDFSName + j, file.getPath().toString());
+                        j++;
                     }
                 }
             }

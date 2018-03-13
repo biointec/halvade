@@ -157,11 +157,11 @@ public class HalvadeFileUtils {
         return 0;
     }
     
-    public static Boolean checkReferenceFilesAvailable(Configuration conf) throws IOException, URISyntaxException {
+    public static Boolean checkReferenceFilesAvailable(Configuration conf, boolean local) throws IOException, URISyntaxException {
         Boolean rnaPipeline = HalvadeConf.getIsRNA(conf);
         String missing_files = "";
         String ref = HalvadeConf.getRef(conf);
-        FileSystem fs = FileSystem.get(new URI(ref), conf);
+        FileSystem fs = FileSystem.get(new URI((local?"file://":"") + ref), conf);
         String suffix = ref.endsWith(HalvadeFileConstants.FASTA_SUFFIX) ? HalvadeFileConstants.FASTA_SUFFIX : HalvadeFileConstants.FA_SUFFIX;
         int aln = HalvadeConf.getAligner(conf);
         String[] stepOneRequiredFiles = (rnaPipeline ? HalvadeFileConstants.STAR_REF_FILES : HalvadeFileConstants.DNA_ALN_REF_FILES[aln]); 

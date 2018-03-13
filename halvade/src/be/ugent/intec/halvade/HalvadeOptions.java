@@ -163,7 +163,7 @@ public class HalvadeOptions {
                 HalvadeConf.setStarDirOnHDFS(hConf, STARGenome);
             }
             if(hdfsSites != null) {
-                HalvadeConf.setKnownSitesOnHDFS(hConf, hdfsSites);
+                HalvadeConf.setKnownSitesOnHDFS(hConf, hdfsSites, local);
             }
             HalvadeConf.setAligner(hConf, aln);
             HalvadeConf.setIsPaired(hConf, paired);
@@ -219,7 +219,7 @@ public class HalvadeOptions {
                 HalvadeConf.setSEC(hConf, stand_emit_conf);
             }
             
-            HalvadeFileUtils.checkReferenceFilesAvailable(hConf);
+            HalvadeFileUtils.checkReferenceFilesAvailable(hConf, local);
 
         } catch (ParseException e) {
             Logger.DEBUG(e.getMessage());
@@ -306,7 +306,7 @@ public class HalvadeOptions {
         be.ugent.intec.halvade.utils.Logger.DEBUG("parsing dictionary " + getDictNameFromFasta(ref));
         try {
             String DictFilename = getDictNameFromFasta(ref);
-            FileSystem fs = FileSystem.get(new URI(DictFilename), conf);
+            FileSystem fs = FileSystem.get(new URI((local? "file://" : "") + DictFilename), conf);
             FSDataInputStream stream = fs.open(new Path(DictFilename));
             String line = getLine(stream); // header
             dict = new SAMSequenceDictionary();
@@ -680,6 +680,18 @@ public class HalvadeOptions {
             local = false;
         } else if (fs.getClass().getName().equalsIgnoreCase(HalvadeFileConstants.LOCALFS)) {
             local = true;
+        }
+        try {
+            FileStatus[] files = fs.listStatus(new Path(ref));
+        } catch(java.io.FileNotFoundException e) {
+            Logger.DEBUG("reference file not found on " + ( local ? "local disk" : "a distributed fs (HDFS)"));
+            fs = FileSystem.get(new URI("file://" + ref), halvadeConf);
+            FileStatus[] files = fs.listStatus(new Path("file://" + ref));
+            if(fs.getClass().getName().equalsIgnoreCase(HalvadeFileConstants.DFS)) {
+                local = false;
+            } else if (fs.getClass().getName().equalsIgnoreCase(HalvadeFileConstants.LOCALFS)) {
+                local = true;
+            }
         }
         Logger.DEBUG("reference file is on " + ( local ? "local disk" : "a distributed fs (HDFS)"));
         // check if the other files are present??
