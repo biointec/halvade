@@ -104,12 +104,10 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
         HalvadeFileUtils.uploadFileToHDFS(fs, mergeFile.getAbsolutePath(), out + mergeFile.getName());
 
         // build new genome ref
-        String pass2GenDir = HalvadeConf.getStarDirPass2HDFS(context.getConfiguration());
-        String newGenomeDir = pass2GenDir;
-        if(requireUploadToHDFS) {
-            String pass2uid = HalvadeConf.getPass2UID(context.getConfiguration());
-            newGenomeDir = tmpDir + pass2uid;
-        }
+        String hdfsPass2GenDir = HalvadeConf.getStarDirPass2HDFS(context.getConfiguration());
+        
+        String pass2uid = HalvadeConf.getPass2UID(context.getConfiguration());
+        String newGenomeDir = tmpDir + pass2uid;
         File starOut = new File(newGenomeDir);
         starOut.mkdirs();
         
@@ -121,13 +119,13 @@ public class RebuildStarGenomeReducer extends Reducer<GenomeSJ, Text, LongWritab
         if(requireUploadToHDFS) {
             //upload to outputdir
             Logger.DEBUG("Uploading STAR genome to parallel filesystem...");
-            fs.mkdirs(new Path(pass2GenDir));
+            fs.mkdirs(new Path(hdfsPass2GenDir));
             File[] genFiles = starOut.listFiles();
             for(File gen : genFiles) {
-                HalvadeFileUtils.uploadFileToHDFS(fs, gen.getAbsolutePath(), pass2GenDir + gen.getName());
+                HalvadeFileUtils.uploadFileToHDFS(fs, gen.getAbsolutePath(), hdfsPass2GenDir + gen.getName());
             }
 //            HalvadeFileUtils.removeLocalDir(keep, newGenomeDir);
-            Logger.DEBUG("Finished uploading new reference to " + pass2GenDir);
+            Logger.DEBUG("Finished uploading new reference to " + hdfsPass2GenDir);
         }
         HalvadeFileUtils.removeLocalFile(mergeJS);
     }

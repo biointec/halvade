@@ -332,13 +332,14 @@ public class HalvadeFileUtils {
     public static String downloadSTARIndex(TaskInputOutputContext context, String id, boolean usePass2Genome) throws IOException, URISyntaxException {
         Configuration conf = context.getConfiguration();
         Boolean refIsLocal = HalvadeConf.getRefIsLocal(context.getConfiguration()); 
-        String ref = usePass2Genome ? HalvadeConf.getStarDirPass2HDFS(conf) : HalvadeConf.getStarDirOnHDFS(conf); // TODO check if this is ok??
-        if(refIsLocal) // for both pass 1 and pass 2!
-            return ref;
+        String ref = usePass2Genome ? HalvadeConf.getStarDirPass2HDFS(conf) : HalvadeConf.getStarDirOnHDFS(conf);
+        String tmpDir = HalvadeConf.getScratchTempDir(context.getConfiguration());
+        if(refIsLocal) {// for both pass 1 and pass 2!
+            String pass2uid = HalvadeConf.getPass2UID(context.getConfiguration());
+            return (usePass2Genome? tmpDir + pass2uid : ref);
+        }
         String HDFSRef = ref;
-        String refDir = HalvadeConf.getScratchTempDir(conf);
-        if(!refDir.endsWith("/")) refDir = refDir + "/"; // should already be with a / ...
-        HalvadeFileLock lock = new HalvadeFileLock(refDir, HalvadeFileConstants.REF_LOCK);
+        HalvadeFileLock lock = new HalvadeFileLock(tmpDir, HalvadeFileConstants.REF_LOCK);
         FileSystem fs = FileSystem.get(new URI(HDFSRef), conf);
         String filebase = new Path(HDFSRef).getName() + "/";
         
@@ -346,12 +347,12 @@ public class HalvadeFileUtils {
         try {
             for (String file : HalvadeFileConstants.STAR_REF_FILES) {
                 String newfile = HDFSRef + file;
-                downloadFileWithLock(fs, lock, newfile, refDir + filebase + file, context.getConfiguration());                
+                downloadFileWithLock(fs, lock, newfile, tmpDir + filebase + file, context.getConfiguration());                
             }
             for (String file : HalvadeFileConstants.STAR_REF_OPTIONAL_FILES) {
                 String newfile = HDFSRef + file;
                 if(fs.exists(new Path(newfile))) 
-                    downloadFileWithLock(fs, lock, newfile, refDir + filebase + file, context.getConfiguration());
+                    downloadFileWithLock(fs, lock, newfile, tmpDir + filebase + file, context.getConfiguration());
             }
             
         } catch (InterruptedException ex) {
@@ -359,8 +360,8 @@ public class HalvadeFileUtils {
         } finally {
             lock.removeAndReleaseLock();
         }
-        Logger.DEBUG("local star reference: " + refDir + filebase);
-        return refDir + filebase;
+        Logger.DEBUG("local star reference: " + tmpDir + filebase);
+        return tmpDir + filebase;
     }
     
     public static String[] downloadSites(TaskInputOutputContext context, String id) throws IOException, URISyntaxException, InterruptedException {
