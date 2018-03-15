@@ -243,14 +243,13 @@ public class HalvadeConf {
     private static final String sitesOnHDFSName = "hdfssites";
     private static final String numberOfSites = "numsites";
     public static void setKnownSitesOnHDFS(Configuration conf, String[] val, boolean local) throws IOException, URISyntaxException {
-        conf.setInt(numberOfSites, val.length);
         FileSystem fs;
         int j = 0;
         for(int i = 0; i < val.length;i ++) {
             String path = ( local ? "file://" : "") + val[i];
             fs = FileSystem.get(new URI(path), conf);
-            if(fs.isFile(new Path(val[i]))) {
-                conf.set(sitesOnHDFSName + j, path);
+            if(fs.isFile(new Path(path))) {
+                conf.set(sitesOnHDFSName + j, val[i]);
                 j++;
             } else {
                 FileStatus[] files = fs.listStatus(new Path(path));
@@ -262,6 +261,7 @@ public class HalvadeConf {
                 }
             }
         }
+        conf.setInt(numberOfSites, j);
     }    
     
     public static String[] getKnownSitesOnHDFS(Configuration conf) {        
