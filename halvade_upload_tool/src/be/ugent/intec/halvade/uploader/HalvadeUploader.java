@@ -56,6 +56,10 @@ import org.seqdoop.hadoop_bam.SequencedFragment;
 public class HalvadeUploader  extends Configured implements Tool {
     protected Options options = new Options();
     private int mthreads = 1;
+    private long refSize = 3088286401L;
+    private int readSize = 151;
+    private int maxCov = -1;
+    private long maxNumLines = -1;
     private boolean isInterleaved = false;
     private CompressionCodec codec;
     private String manifest;
@@ -197,7 +201,7 @@ public class HalvadeUploader  extends Configured implements Tool {
         
         // start reading
         (new Thread(factory)).start();
-        
+                
         int bestThreads = mthreads;
         long maxFileSize = getBestFileSize(); 
         if(useAWS) {
@@ -207,7 +211,7 @@ public class HalvadeUploader  extends Configured implements Tool {
                 fileThreads[t] = new AWSInterleaveFiles(
                         outputDir + "halvade_" + t + "_", 
                         maxFileSize, 
-                        upl, t, codec, fromHDFS);
+                        upl, t, codec, fromHDFS, maxNumLines);
                 fileThreads[t].start();
             }
             for(int t = 0; t < bestThreads; t++)
@@ -222,7 +226,7 @@ public class HalvadeUploader  extends Configured implements Tool {
                 fileThreads[t] = new HDFSInterleaveFiles(
                         outputDir + "halvade_" + t + "_", 
                         maxFileSize, 
-                        fs, t, codec, fromHDFS);
+                        fs, t, codec, fromHDFS, maxNumLines);
                 fileThreads[t].start();
             }
             for(int t = 0; t < bestThreads; t++)
@@ -260,6 +264,18 @@ public class HalvadeUploader  extends Configured implements Tool {
                                 .withDescription(  "Sets the maximum filesize of each split in MB." )
                                 .withLongOpt("size")
                                 .create( "s");
+        Option optCov = OptionBuilder.withArgName( "maximumcoverage" )
+                                .hasArg()
+                                .withDescription(  "Sets the maximum coverage for this sample, if the number of reads is more than the maximum coverage, will downsample (by removing the last reads that are too much). Doesn't work with BAM inputs yet." )
+                                .create( "cov" );
+        Option optReadSize = OptionBuilder.withArgName( "readsize" )
+                                .hasArg()
+                                .withDescription(  "Size of the reads to calculate coverage [151]." )
+                                .create( "readsize" );
+        Option optRefSize = OptionBuilder.withArgName( "refsize" )
+                                .hasArg()
+                                .withDescription(  "Size of the reference to calculate coverage [3088286401]." )
+                                .create( "refsize" );
         Option optThreads = OptionBuilder.withArgName( "threads" )
                                 .hasArg()
                                 .withDescription(  "Sets the available threads [1]." )
@@ -311,6 +327,9 @@ public class HalvadeUploader  extends Configured implements Tool {
         options.addOption(optHDFS);
         options.addOption(optBam);
         options.addOption(optRed);
+        options.addOption(optReadSize);
+        options.addOption(optCov);
+        options.addOption(optRefSize);
     }
     
     public void parseArguments(String[] args) throws ParseException {
@@ -333,6 +352,14 @@ public class HalvadeUploader  extends Configured implements Tool {
             profile = line.getOptionValue("profile");    
         if(line.hasOption("t"))
             mthreads = Integer.parseInt(line.getOptionValue("t"));
+        if(line.hasOption("readsize"))
+            readSize = Integer.parseInt(line.getOptionValue("readsize"));
+        if(line.hasOption("refsize"))
+            refSize = Integer.parseInt(line.getOptionValue("refsize"));
+        if(line.hasOption("cov")) {
+            maxCov = Integer.parseInt(line.getOptionValue("cov"));
+            maxNumLines = (4*refSize*maxCov)/(readSize*mthreads);
+        }
         if(line.hasOption("red"))
             red = Integer.parseInt(line.getOptionValue("red"));
         else if (BAMInput) {

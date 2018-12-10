@@ -30,6 +30,7 @@ import java.io.OutputStream;
 abstract class BaseInterleaveFiles extends Thread {
     protected static final int BUFFERSIZE = 8*1024;
     protected static long maxFileSize; // ~60MB
+    protected long maxNumLines;
     protected FileReaderFactory factory;
     protected String fileBase;
     protected long read, written, count;
@@ -62,7 +63,7 @@ abstract class BaseInterleaveFiles extends Thread {
     @Override
     public void run() {
         try {
-            Logger.DEBUG("Starting thread " + thread + " to write reads to " + fsName);
+            Logger.DEBUG("Starting thread " + thread + " to write reads to " + fsName + " with max " + maxNumLines + " number of reads.");
             
             int part = 0, tSize;  
             long fileWritten = 0;  
@@ -72,7 +73,8 @@ abstract class BaseInterleaveFiles extends Thread {
             
             fileWritten = 0;
             ReadBlock block = factory.retrieveBlock();
-            while(block != null) {
+            boolean covCheck = true;
+            while(block != null && covCheck) {
                 fileWritten += block.write(gzipStream);
                 count += block.getSize();
                 tSize = getSize(dataStream);
@@ -87,6 +89,7 @@ abstract class BaseInterleaveFiles extends Thread {
                     gzipStream = getNewCompressedStream(dataStream);                 
                 }
                 block = factory.retrieveBlock();
+                if(maxNumLines > 0) covCheck = count <= maxNumLines;
             }
             // finish the files          
             gzipStream.close();

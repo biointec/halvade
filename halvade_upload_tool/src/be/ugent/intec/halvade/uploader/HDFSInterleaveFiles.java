@@ -34,11 +34,12 @@ public class HDFSInterleaveFiles extends BaseInterleaveFiles {
     protected FileSystem fs; // HDFS or others (lustre,gpfs)
     protected CompressionCodec codec;
     
-    public HDFSInterleaveFiles(String base, long maxFileSize, FileSystem fs, int thread, CompressionCodec codec, boolean fromHDFS) {
+    public HDFSInterleaveFiles(String base, long maxFileSize, FileSystem fs, int thread, CompressionCodec codec, boolean fromHDFS, long maxNumLines) {
         super(base, maxFileSize, thread, fromHDFS);
         this.fs = fs;
         this.fsName = "HDFS";
         this.codec = codec;
+        this.maxNumLines = maxNumLines;
         if(codec != null)
             useHadoopCompression = true;
     }
