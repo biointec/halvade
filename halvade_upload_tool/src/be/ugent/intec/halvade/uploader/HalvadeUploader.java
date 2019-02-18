@@ -235,7 +235,7 @@ public class HalvadeUploader  extends Configured implements Tool {
         factory.stopFactory();
         factorythread.join();
         timer.stop();
-        Logger.INFO("Time to process data" + (maxCov > 0 ? "("+maxCov+"x Coverage)" : "") + ": " + timer.getFormattedCurrentTime());     
+        Logger.INFO("Time to process data" + (maxCov > 0 ? " ("+maxCov+"x Coverage)" : "") + ": " + timer.getFormattedCurrentTime());     
         return 0;
     }
     
