@@ -397,7 +397,7 @@ public class HalvadeOptions {
                 .create();
         Option optSites = OptionBuilder.withArgName("snpDBa,snpDBb")
                 .hasArg()
-                .isRequired(true)
+//                .isRequired(true)
                 .withDescription("Name of snpDB files for the genome on HDFS. If multiple separate with \',\'.")
                 .create("D");
         Option optStarGenome = OptionBuilder.withArgName("stargenome")
@@ -695,10 +695,6 @@ public class HalvadeOptions {
         }
         Logger.DEBUG("reference file is on " + ( local ? "local disk" : "a distributed fs (HDFS)"));
         // check if the other files are present??
-        if (line.hasOption("D")) {
-            sites = line.getOptionValue("D");
-            hdfsSites = sites.split(",");
-        }
         if (line.hasOption("B")) {
             halvadeBinaries = line.getOptionValue("B");
         } else {
@@ -739,6 +735,14 @@ public class HalvadeOptions {
         }
         if (line.hasOption("skip_bqsr")) {
             skipBQSR = true;
+        } else {
+            if (line.hasOption("D")) {
+                sites = line.getOptionValue("D");
+                hdfsSites = sites.split(",");
+            } else {
+                throw new ParseException("If the BQSR step is not skipped a valid database file (option -D) should be provided.");
+            }
+            
         }
         if (line.hasOption("rna")) {
             rnaPipeline = true;

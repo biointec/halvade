@@ -63,7 +63,7 @@ abstract class BaseInterleaveFiles extends Thread {
     @Override
     public void run() {
         try {
-            Logger.DEBUG("Starting thread " + thread + " to write reads to " + fsName + " with max " + maxNumLines + " number of reads.");
+            Logger.DEBUG("Starting thread " + thread); // + " to write reads to " + fsName + " with max " + maxNumLines + " number of reads.");
             
             int part = 0, tSize;  
             long fileWritten = 0;  
@@ -108,6 +108,8 @@ abstract class BaseInterleaveFiles extends Thread {
             closeStreams(dataStream, gzipStream);
         } catch (IOException ex) {
             Logger.EXCEPTION(ex);
+        } finally {
+            Logger.DEBUG("Finished thread " + thread);
         }
     }
 }

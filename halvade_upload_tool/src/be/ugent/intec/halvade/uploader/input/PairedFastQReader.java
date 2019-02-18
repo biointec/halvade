@@ -23,8 +23,15 @@ public class PairedFastQReader extends BaseFileReader {
         super(true);
         readerA = getReader(fromHDFS, fileA);
         readerB = getReader(fromHDFS, fileB);
-        toStr = fileA + " & " + fileB;
+        toStr = fileA.substring(fileA.lastIndexOf("/")+1) + " & " + fileB.substring(fileB.lastIndexOf("/")+1);
         Logger.DEBUG("Paired: " + toStr);
+    }
+    
+    @Override
+    public void closeReaders() throws IOException {
+        readerA.close();
+        readerB.close();
+        Logger.INFO("closed: " + toStr);        
     }
 
     @Override
@@ -39,10 +46,11 @@ public class PairedFastQReader extends BaseFileReader {
             }
             i = 0;
             while(i <LINES_PER_READ && check) {
-                check = block.fastAddLine(readerB.readLine());
+                check = check && block.fastAddLine(readerB.readLine());
                 i++;
             }
             if(!check) {
+                // open next read here....
                 block.revertToCheckPoint();
                 return -1;
             }

@@ -34,6 +34,12 @@ public class SingleFastQReader extends BaseFileReader {
     }
 
     @Override
+    public void closeReaders() throws IOException {
+        readerA.close();
+        Logger.INFO("closed: " + toStr);        
+    }
+    
+    @Override
     protected int addNextRead(ReadBlock block) throws IOException {
         if(block.checkCapacity(LINES_PER_READ*readsFactor)) {
             block.setCheckPoint();

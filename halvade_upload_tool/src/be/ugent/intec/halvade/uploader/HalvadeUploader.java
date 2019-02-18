@@ -35,11 +35,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
-import org.apache.hadoop.io.compress.GzipCodec;
-import org.apache.hadoop.io.compress.Lz4Codec;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -47,7 +44,6 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.seqdoop.hadoop_bam.BAMInputFormat;
 import org.seqdoop.hadoop_bam.FastqOutputFormat;
-import org.seqdoop.hadoop_bam.SequencedFragment;
 
 /**
  *
@@ -93,7 +89,7 @@ public class HalvadeUploader  extends Configured implements Tool {
     public int run(String[] strings) throws Exception {
         try {
             parseArguments(strings);  
-            if(BAMInput){ 
+            if(BAMInput){
                 // run mapreduce job to preprocess
                 runMapReduceJob(file1, outputDir, red);
             } else {
@@ -107,6 +103,7 @@ public class HalvadeUploader  extends Configured implements Tool {
         } catch (Throwable ex) {
             Logger.THROWABLE(ex);
         }
+//        Logger.INFO("returning 0...");
         return 0;
     }
     
@@ -200,12 +197,14 @@ public class HalvadeUploader  extends Configured implements Tool {
         }
         
         // start reading
-        (new Thread(factory)).start();
+        Thread factorythread = new Thread(factory);
+        factorythread.start();
                 
         int bestThreads = mthreads;
         long maxFileSize = getBestFileSize(); 
+        BaseInterleaveFiles[] fileThreads;
         if(useAWS) {
-            AWSInterleaveFiles[] fileThreads = new AWSInterleaveFiles[bestThreads];
+            fileThreads = new AWSInterleaveFiles[bestThreads];
             // start interleaveFile threads
             for(int t = 0; t < bestThreads; t++) {
                 fileThreads[t] = new AWSInterleaveFiles(
@@ -220,8 +219,9 @@ public class HalvadeUploader  extends Configured implements Tool {
                 upl.shutDownNow(); 
         } else {
             
-            HDFSInterleaveFiles[] fileThreads = new HDFSInterleaveFiles[bestThreads];
+            fileThreads = new HDFSInterleaveFiles[bestThreads];
             // start interleaveFile threads
+//            Logger.INFO("Starting " + bestThreads + " threads to write data.");
             for(int t = 0; t < bestThreads; t++) {
                 fileThreads[t] = new HDFSInterleaveFiles(
                         outputDir + "halvade_" + t + "_", 
@@ -232,9 +232,10 @@ public class HalvadeUploader  extends Configured implements Tool {
             for(int t = 0; t < bestThreads; t++)
                 fileThreads[t].join();
         }
-        factory.finalize();
+        factory.stopFactory();
+        factorythread.join();
         timer.stop();
-        Logger.DEBUG("Time to process data: " + timer.getFormattedCurrentTime());     
+        Logger.INFO("Time to process data: " + timer.getFormattedCurrentTime());     
         return 0;
     }
     

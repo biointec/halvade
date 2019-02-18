@@ -74,16 +74,26 @@ public class FileReaderFactory extends BaseFileReader implements Runnable {
     }
     
     protected synchronized boolean getNextReader() {
+        Logger.INFO("getting next reader");
         if(currentReader == null) {
+            Logger.INFO("reader is null");
             if(readers.size() > 0) {
-                currentReader = readers.remove(readers.size() - 1);
-                Logger.DEBUG("Reader: " + currentReader);
+                Logger.INFO("get last reader: " + readers.size());
+                // close reader?
+                currentReader = readers.remove(0);
+                Logger.INFO("Reader: " + currentReader);
                 return true;
             } else {
                 Logger.DEBUG("Processed all readers");
                 return false;
             }
         } else return true;
+    }
+    
+    public void stopFactory() throws Throwable {
+        check = false;
+        blocks.clear(); // make sure it can continue in the loop and close the current reader!
+        Logger.INFO("Stop called");
     }
 
 
@@ -93,24 +103,41 @@ public class FileReaderFactory extends BaseFileReader implements Runnable {
     
     @Override
     public void run() {
+        Logger.INFO("Starting reader factory");
         blocks = new ArrayBlockingQueue<>(READ_BLOCK_CAPACITY_PER_THREAD*threads);
         if(currentReader == null) {
             if(!getNextReader()) check = false;
         }
         try {
             while(check) {
+                Logger.INFO("Getting block... " + check);
                 ReadBlock block = new ReadBlock();
                 boolean hasReads = super.getNextBlock(block);
-                if (!hasReads) {
+                if (!hasReads && !check) {
+                    Logger.INFO("new reader... " + blocks.size() +" " + check);
+                    currentReader.closeReaders(); // close streams!
                     currentReader = null;
                     if(!getNextReader())
                         check = false;
                 } else {
+                Logger.INFO("putting block... " + blocks.size() + " " + check);
                     blocks.put(block);
                 }
             }
+            currentReader.closeReaders(); // close streams!
+            currentReader = null;
+            Logger.INFO("Factory after while loop");
+            readers = null;
+            if(count > 0) Logger.INFO("Total # reads: " + count);
         } catch (InterruptedException ex) {
             Logger.EXCEPTION(ex);
+        } catch (IOException ex) {
+            Logger.EXCEPTION(ex);
         }
+    }
+
+    @Override
+    protected void closeReaders() throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

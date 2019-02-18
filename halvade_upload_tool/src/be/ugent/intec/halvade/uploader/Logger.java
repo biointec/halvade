@@ -29,7 +29,7 @@ public class Logger {
      * 2: EXCEPTION
      * 3:ALL
      */
-    private static int LEVEL = 2;
+    private static int LEVEL = 0;
     private static final int EXCEPTION = 2;
     private static final int DEBUG = 1;
     private static final int INFO = 0;
@@ -41,17 +41,13 @@ public class Logger {
     }
     
     public static void EXCEPTION(Exception ex){
-        if (LEVEL >= EXCEPTION) {
-            System.err.println("[EXCEPTION] " + ex.getLocalizedMessage());
-            ex.printStackTrace();
-        }
+        System.err.println("[EXCEPTION] " + ex.getLocalizedMessage());
+        ex.printStackTrace();
     }
     
     public static void THROWABLE(Throwable ex){
-        if (LEVEL >= EXCEPTION) {
-            System.err.println("[EXCEPTION] " + ex.getLocalizedMessage());
-            ex.printStackTrace();
-        }
+        System.err.println("[EXCEPTION] " + ex.getLocalizedMessage());
+        ex.printStackTrace();
     }
     
     public static void DEBUG(String message) {

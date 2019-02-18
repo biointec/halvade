@@ -73,9 +73,9 @@ public abstract class BaseFileReader {
     }  
 
     @Override
-    public void finalize() throws Throwable {
-        super.finalize(); 
-        if(count > 0) Logger.DEBUG("Total # reads: " + count);
+    protected void finalize() throws Throwable {
+        super.finalize(); //To change body of generated methods, choose Tools | Templates.
+        Logger.INFO("Finished: " + toStr);
     }
     
     public synchronized boolean getNextBlock(ReadBlock block) {
@@ -83,6 +83,7 @@ public abstract class BaseFileReader {
         try {
             while(addNextRead(block) == 0) {
             }
+            // if addnext is -1 then close this!
             count += block.size / LINES_PER_READ;
         } catch (IOException ex) {
             Logger.EXCEPTION(ex);
@@ -94,4 +95,5 @@ public abstract class BaseFileReader {
     }
     
     protected abstract int addNextRead(ReadBlock block) throws IOException;
+    protected abstract void closeReaders() throws IOException;
 }
