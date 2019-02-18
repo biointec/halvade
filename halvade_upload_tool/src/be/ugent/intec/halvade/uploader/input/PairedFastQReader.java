@@ -31,7 +31,7 @@ public class PairedFastQReader extends BaseFileReader {
     public void closeReaders() throws IOException {
         readerA.close();
         readerB.close();
-        Logger.INFO("closed: " + toStr);        
+//        Logger.INFO("closed: " + toStr);        
     }
 
     @Override
