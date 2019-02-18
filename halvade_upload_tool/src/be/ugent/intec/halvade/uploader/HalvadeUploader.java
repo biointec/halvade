@@ -243,7 +243,6 @@ public class HalvadeUploader  extends Configured implements Tool {
         return bestFileSize;
     }
     
-    
     public void createOptions() {
         Option optOut = OptionBuilder.withArgName( "output" )
                                 .hasArg()
