@@ -109,7 +109,7 @@ abstract class BaseInterleaveFiles extends Thread {
         } catch (IOException ex) {
             Logger.EXCEPTION(ex);
         } finally {
-            Logger.INFO("Finished thread " + thread);
+//            Logger.INFO("Finished thread " + thread);
         }
     }
 }
