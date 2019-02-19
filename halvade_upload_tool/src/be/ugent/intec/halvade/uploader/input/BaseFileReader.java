@@ -75,7 +75,7 @@ public abstract class BaseFileReader {
     @Override
     protected void finalize() throws Throwable {
         super.finalize(); //To change body of generated methods, choose Tools | Templates.
-        Logger.INFO("Finished: " + toStr);
+//        Logger.INFO("Finished: " + toStr);
     }
     
     public synchronized boolean getNextBlock(ReadBlock block) {
@@ -86,6 +86,7 @@ public abstract class BaseFileReader {
             // if addnext is -1 then close this!
             count += block.size / LINES_PER_READ;
         } catch (IOException ex) {
+            Logger.INFO("error occured: " + ex.getMessage());
             Logger.EXCEPTION(ex);
         }
         if(block.size == 0) {

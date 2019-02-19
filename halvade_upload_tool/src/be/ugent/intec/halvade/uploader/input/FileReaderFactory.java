@@ -58,6 +58,7 @@ public class FileReaderFactory extends BaseFileReader implements Runnable {
         try {
             ReadBlock block = null;
             while((check || blocks.size() > 0) && block == null) {
+//                Logger.INFO("get block" + blocks.size());
                 block = blocks.poll(1000, TimeUnit.MILLISECONDS);
             }
             return block;
@@ -78,10 +79,10 @@ public class FileReaderFactory extends BaseFileReader implements Runnable {
         if(currentReader == null) {
 //            Logger.INFO("reader is null");
             if(readers.size() > 0) {
-//                Logger.INFO("get last reader: " + readers.size());
+//                Logger.INFO("get first reader");
                 // close reader?
                 currentReader = readers.remove(0);
-                Logger.INFO("Reader: " + currentReader);
+                Logger.INFO("Processing " + currentReader);
                 return true;
             } else {
                 Logger.DEBUG("Processed all readers");
@@ -103,21 +104,23 @@ public class FileReaderFactory extends BaseFileReader implements Runnable {
     
     @Override
     public void run() {
-        Logger.INFO("Starting reader factory");
+//        Logger.INFO("Starting reader factory");
         blocks = new ArrayBlockingQueue<>(READ_BLOCK_CAPACITY_PER_THREAD*threads);
         if(currentReader == null) {
             if(!getNextReader()) check = false;
         }
         try {
             while(check) {
+//                Logger.INFO("in loop: " + check);
                 ReadBlock block = new ReadBlock();
                 boolean hasReads = super.getNextBlock(block);
-                if (!hasReads && !check) {
+                if (!hasReads) {
                     currentReader.closeReaders(); // close streams!
                     currentReader = null;
                     if(!getNextReader())
                         check = false;
                 } else {
+//                    Logger.INFO("put block: " + blocks.size());
                     blocks.put(block);
                 }
             }

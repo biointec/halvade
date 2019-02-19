@@ -63,7 +63,7 @@ abstract class BaseInterleaveFiles extends Thread {
     @Override
     public void run() {
         try {
-            Logger.DEBUG("Starting thread " + thread); // + " to write reads to " + fsName + " with max " + maxNumLines + " number of reads.");
+//            Logger.INFO("Starting thread " + thread); // + " to write reads to " + fsName + " with max " + maxNumLines + " number of reads.");
             
             int part = 0, tSize;  
             long fileWritten = 0;  
@@ -109,7 +109,7 @@ abstract class BaseInterleaveFiles extends Thread {
         } catch (IOException ex) {
             Logger.EXCEPTION(ex);
         } finally {
-            Logger.DEBUG("Finished thread " + thread);
+            Logger.INFO("Finished thread " + thread);
         }
     }
 }
